@@ -35,23 +35,28 @@ class Game:
         self.__playerTwo.rect.x = 1600  # go to x
         self.__playerTwo.rect.y = 580  # go to y
 
-        self.__playerOne.draw(self.__screen)
-        self.__playerTwo.draw(self.__screen)
+        self.__playerOne.draw_player(self.__screen)
+        self.__playerTwo.draw_player(self.__screen)
+
+        # all_sprites = pygame.sprite.Group([self.__playerOne, self.__playerTwo])
 
         # Update the display
         pygame.display.flip()
 
     def checkLeftBounds(self, sprite):
-        if sprite.rect.x > sprite.velocity:
+        if sprite.rect.x > sprite.velocity_player:
             return True
 
         return False
 
     def checkRightBounds(self, sprite):
-        if sprite.rect.x < self.__screen.get_width() - sprite.velocity - sprite.rect.width:
+        if sprite.rect.x < self.__screen.get_width() - sprite.velocity_player - sprite.rect.width:
             return True
 
         return False
+
+    def checkCollision(self, sprite_one, sprite_two):
+        pass
 
     def run(self):
         # Add game loop if needed
@@ -63,15 +68,29 @@ class Game:
 
                     # sys.exit()
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT] and self.checkLeftBounds(self.__playerTwo):
-                self.__playerTwo.moveLeft()
-            if keys[pygame.K_RIGHT] and self.checkRightBounds(self.__playerTwo):
-                self.__playerTwo.moveRight()
+            if keys[pygame.K_LEFT]:
+                if self.checkLeftBounds(self.__playerTwo) and not self.__playerTwo.rect.collidepoint(self.__playerOne.rect.midright):
+                    self.__playerTwo.move_left()
+                else:
+                    self.__playerTwo.bounce_back("right")
 
-            if keys[pygame.K_a] and self.checkLeftBounds(self.__playerOne):
-                self.__playerOne.moveLeft()
-            if keys[pygame.K_d] and self.checkRightBounds(self.__playerOne):
-                self.__playerOne.moveRight()
+            if keys[pygame.K_RIGHT]:
+                if self.checkRightBounds(self.__playerTwo) and not self.__playerTwo.rect.collidepoint(self.__playerOne.rect.midleft):
+                    self.__playerTwo.move_right()
+                else:
+                    self.__playerTwo.bounce_back("left")
+
+            if keys[pygame.K_a]:
+                if self.checkLeftBounds(self.__playerOne) and not self.__playerOne.rect.collidepoint(self.__playerTwo.rect.midright):
+                    self.__playerOne.move_left()
+                else:
+                    self.__playerOne.bounce_back("right")
+
+            if keys[pygame.K_d]:
+                if self.checkRightBounds(self.__playerOne) and not self.__playerOne.rect.collidepoint(self.__playerTwo.rect.midleft):
+                    self.__playerOne.move_right()
+                else:
+                    self.__playerOne.bounce_back("left")
 
             if not self.__playerTwo.isJumping:
                 if keys[pygame.K_UP]:
@@ -95,8 +114,8 @@ class Game:
 
     def refresh(self):
         self.__screen.blit(self.__background, (0, 0))
-        self.__playerOne.draw(self.__screen)
-        self.__playerTwo.draw(self.__screen)
+        self.__playerOne.draw_player(self.__screen)
+        self.__playerTwo.draw_player(self.__screen)
         pygame.display.flip()
 
     @staticmethod

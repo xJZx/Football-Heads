@@ -2,6 +2,7 @@ import pygame
 from pygame import image
 import os
 
+
 class Player(pygame.sprite.Sprite):
 
     def __init__(self, player_side):
@@ -9,7 +10,7 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.__MAX_VELOCITY = 12
-        self.velocity = 10
+        self.velocity_player = 10
 
         self.isJumping = False
         self.jumpCount = 8
@@ -38,11 +39,18 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load(self.__default_texture_path).convert_alpha()
         self.rect = self.image.get_rect()
 
-    def moveLeft(self):
-        self.rect.x -= self.velocity
+    def move_left(self):
+        self.rect.x -= self.velocity_player
 
-    def moveRight(self):
-        self.rect.x += self.velocity
+    def move_right(self):
+        self.rect.x += self.velocity_player
+
+    def bounce_back(self, bouncing_side):
+        if bouncing_side == 'left':
+            self.rect.x -= 15
+
+        else:
+            self.rect.x += 15
 
     def jump(self):
         if self.__currentJumpCount >= -self.jumpCount:
@@ -56,12 +64,11 @@ class Player(pygame.sprite.Sprite):
             self.__currentJumpCount = self.jumpCount
             self.isJumping = False
 
-
     def kick(self, press_time):
         pass
 
     def change_state(self, target_state):
         pass
 
-    def draw(self, screen):
+    def draw_player(self, screen):
         screen.blit(self.image, self.rect)
