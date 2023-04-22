@@ -27,15 +27,15 @@ class Player(pygame.sprite.Sprite):
         self.__player_side = player_side
 
         if self.__player_side == "left":
-            self.__default_texture_path = os.path.join(self.__root_dir, 'Textures\player1_default.png')
+            self.__default_texture_path = os.path.join(self.__root_dir, 'Textures\player1_default_merged.png')
             self.__lost_texture_path = os.path.join(self.__root_dir, 'Textures\player1_lost.jpg')
             self.__won_texture_path = os.path.join(self.__root_dir, 'Textures\player1_won.jpg')
         else:
-            self.__default_texture_path = os.path.join(self.__root_dir, 'Textures\player2_default.png')
+            self.__default_texture_path = os.path.join(self.__root_dir, 'Textures\player2_default_merged.png')
             self.__lost_texture_path = os.path.join(self.__root_dir, 'Textures\player2_lost.jpg')
             self.__won_texture_path = os.path.join(self.__root_dir, 'Textures\player2_won.jpg')
 
-        self.image = pygame.image.load(self.__default_texture_path).convert()
+        self.image = pygame.image.load(self.__default_texture_path).convert_alpha()
         self.rect = self.image.get_rect()
 
     def moveLeft(self):
@@ -44,8 +44,18 @@ class Player(pygame.sprite.Sprite):
     def moveRight(self):
         self.rect.x += self.velocity
 
-    def jump(self, press_time):
-        pass
+    def jump(self):
+        if self.__currentJumpCount >= -self.jumpCount:
+            neg = 1
+            if self.__currentJumpCount < 0:
+                neg = -1
+
+            self.rect.y -= (abs(self.__currentJumpCount) ** 2) * neg
+            self.__currentJumpCount -= 1
+        else:
+            self.__currentJumpCount = self.jumpCount
+            self.isJumping = False
+
 
     def kick(self, press_time):
         pass
