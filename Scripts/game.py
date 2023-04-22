@@ -5,9 +5,6 @@ from player import Player
 
 class Game:
 
-    # Properties
-
-
     # Methods
 
     def __init__(self):
@@ -21,13 +18,13 @@ class Game:
         # Set up the display
         WIDTH = 1920
         HEIGHT = 1080
-        screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.__screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
         # Load the background image
-        background = pygame.image.load(background_image_path)
+        self.__background = pygame.image.load(background_image_path)
 
         # Draw the background image
-        screen.blit(background, (0, 0))
+        self.__screen.blit(self.__background, (0, 0))
 
         self.__playerOne = Player("left")
         self.__playerOne.rect.x = 0  # go to x
@@ -47,6 +44,17 @@ class Game:
         # Update the display
         pygame.display.flip()
 
+    def checkLeftBounds(self, sprite):
+        if sprite.rect.x > sprite.velocity:
+            return True
+
+        return False
+
+    def checkRightBounds(self, sprite):
+        if sprite.rect.x < self.__screen.get_width() - sprite.velocity - sprite.rect.width:
+            return True
+
+        return False
 
     def run(self):
 
@@ -55,6 +63,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+
                     # sys.exit()
 
             # Update game logic and draw game objects

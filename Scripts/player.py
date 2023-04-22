@@ -8,13 +8,15 @@ class Player(pygame.sprite.Sprite):
 
         pygame.sprite.Sprite.__init__(self)
 
-        self.__MAX_VELOCITY = 1
-        self.__velocity = 0
+        self.__MAX_VELOCITY = 12
+        self.velocity = 10
 
-        self.__x_pos = 0
-        self.__y_pos = 0
+        self.isJumping = False
+        self.jumpCount = 8
+        self.__currentJumpCount = self.jumpCount
 
-        self.__MAX_JUMP = 1
+        self.__MAX_JUMP = 300
+        self.__GROUND_LEVEL = 400
 
         self.__MAX_FOOT_ANGLE = 90
         self.__foot_angle = 0
@@ -36,8 +38,11 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load(self.__default_texture_path).convert()
         self.rect = self.image.get_rect()
 
-    def move(self, key):
-        pass
+    def moveLeft(self):
+        self.rect.x -= self.velocity
+
+    def moveRight(self):
+        self.rect.x += self.velocity
 
     def jump(self, press_time):
         pass
@@ -47,3 +52,6 @@ class Player(pygame.sprite.Sprite):
 
     def change_state(self, target_state):
         pass
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
