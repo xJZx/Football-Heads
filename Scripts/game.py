@@ -2,6 +2,7 @@ import pygame
 from pygame import image
 import os
 from player import Player
+from ball import Ball
 
 
 class Game:

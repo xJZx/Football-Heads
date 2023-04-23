@@ -9,34 +9,34 @@ class Player(pygame.sprite.Sprite):
 
         pygame.sprite.Sprite.__init__(self)
 
-        self.__MAX_VELOCITY = 12
+        self.MAX_VELOCITY = 12
         self.velocity_player = 10
 
         self.isJumping = False
         self.jumpCount = 8
-        self.__currentJumpCount = self.jumpCount
+        self.currentJumpCount = self.jumpCount
 
-        self.__MAX_JUMP = 300
-        self.__GROUND_LEVEL = 400
+        self.MAX_JUMP = 300
+        self.GROUND_LEVEL = 400
 
-        self.__MAX_FOOT_ANGLE = 90
-        self.__foot_angle = 0
+        self.MAX_FOOT_ANGLE = 90
+        self.foot_angle = 0
 
-        self.__game_path = os.getcwd()
-        self.__root_dir = os.path.dirname(self.__game_path)
+        self.game_path = os.getcwd()
+        self.root_dir = os.path.dirname(self.game_path)
 
-        self.__player_side = player_side
+        self.player_side = player_side
 
-        if self.__player_side == "left":
-            self.__default_texture_path = os.path.join(self.__root_dir, 'Textures\player1_default_merged.png')
-            self.__lost_texture_path = os.path.join(self.__root_dir, 'Textures\player1_lost.jpg')
-            self.__won_texture_path = os.path.join(self.__root_dir, 'Textures\player1_won.jpg')
+        if self.player_side == "left":
+            self.default_texture_path = os.path.join(self.root_dir, 'Textures\player1_default_merged.png')
+            self.lost_texture_path = os.path.join(self.root_dir, 'Textures\player1_lost.jpg')
+            self.won_texture_path = os.path.join(self.root_dir, 'Textures\player1_won.jpg')
         else:
-            self.__default_texture_path = os.path.join(self.__root_dir, 'Textures\player2_default_merged.png')
-            self.__lost_texture_path = os.path.join(self.__root_dir, 'Textures\player2_lost.jpg')
-            self.__won_texture_path = os.path.join(self.__root_dir, 'Textures\player2_won.jpg')
+            self.default_texture_path = os.path.join(self.root_dir, 'Textures\player2_default_merged.png')
+            self.lost_texture_path = os.path.join(self.root_dir, 'Textures\player2_lost.jpg')
+            self.won_texture_path = os.path.join(self.root_dir, 'Textures\player2_won.jpg')
 
-        self.image = pygame.image.load(self.__default_texture_path).convert_alpha()
+        self.image = pygame.image.load(self.default_texture_path).convert_alpha()
         self.rect = self.image.get_rect()
 
     def move_left(self):
@@ -53,15 +53,15 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += 15
 
     def jump(self):
-        if self.__currentJumpCount >= -self.jumpCount:
+        if self.currentJumpCount >= -self.jumpCount:
             neg = 1
-            if self.__currentJumpCount < 0:
+            if self.currentJumpCount < 0:
                 neg = -1
 
-            self.rect.y -= (abs(self.__currentJumpCount) ** 2) * neg
-            self.__currentJumpCount -= 1
+            self.rect.y -= (abs(self.currentJumpCount) ** 2) * neg
+            self.currentJumpCount -= 1
         else:
-            self.__currentJumpCount = self.jumpCount
+            self.currentJumpCount = self.jumpCount
             self.isJumping = False
 
     def kick(self, press_time):
