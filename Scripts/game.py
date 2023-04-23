@@ -12,7 +12,7 @@ class Game:
     def __init__(self):
         self.game_path = os.getcwd()
         self.root_dir = os.path.dirname(self.game_path)
-        background_image_path = os.path.join(self.root_dir, 'Textures\stadium.jpg')
+        background_image_path = os.path.join(self.root_dir, r'Textures\stadium.jpg')
 
         # Initialize Pygame
         pygame.init()
@@ -20,26 +20,33 @@ class Game:
         # Set up the display
         WIDTH = 1920
         HEIGHT = 1080
-        self.__screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
         # Load the background image
-        self.__background = pygame.image.load(background_image_path)
+        self.background = pygame.image.load(background_image_path)
 
         # Draw the background image
-        self.__screen.blit(self.__background, (0, 0))
+        self.screen.blit(self.background, (0, 0))
 
-        self.__playerOne = Player("left")
-        self.__playerOne.rect.x = 100  # go to x
-        self.__playerOne.rect.y = 580  # go to y
+        self.lower_bounds = 760
 
-        self.__playerTwo = Player("right")
-        self.__playerTwo.rect.x = 1600  # go to x
-        self.__playerTwo.rect.y = 580  # go to y
+        self.playerOne = Player("left")
+        self.playerOne.rect.x = 100  # go to x
+        self.playerOne.rect.y = self.lower_bounds - self.playerOne.rect.height  # go to y
 
-        self.__playerOne.draw_player(self.__screen)
-        self.__playerTwo.draw_player(self.__screen)
+        self.playerTwo = Player("right")
+        self.playerTwo.rect.x = 1600  # go to x
+        self.playerTwo.rect.y = self.lower_bounds - self.playerTwo.rect.height  # go to y
 
-        # all_sprites = pygame.sprite.Group([self.__playerOne, self.__playerTwo])
+        self.ball = Ball()
+        self.ball.rect.x = 960
+        self.ball.rect.y = 400
+
+        self.ball.draw_ball(self.screen)
+        self.playerOne.draw_player(self.screen)
+        self.playerTwo.draw_player(self.screen)
+
+        # all_sprites = pygame.sprite.Group([self.playerOne, self.playerTwo])
 
         # Update the display
         pygame.display.flip()
@@ -51,7 +58,7 @@ class Game:
         return False
 
     def checkRightBounds(self, sprite):
-        if sprite.rect.x < self.__screen.get_width() - sprite.velocity_player - sprite.rect.width:
+        if sprite.rect.x < self.screen.get_width() - sprite.velocity_player - sprite.rect.width:
             return True
 
         return False
@@ -70,43 +77,45 @@ class Game:
                     # sys.exit()
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT]:
-                if self.checkLeftBounds(self.__playerTwo) and not self.__playerTwo.rect.collidepoint(self.__playerOne.rect.midright):
-                    self.__playerTwo.move_left()
+                if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(self.playerOne.rect.midright):
+                    self.playerTwo.move_left()
                 else:
-                    self.__playerTwo.bounce_back("right")
+                    self.playerTwo.bounce_back("right")
 
             if keys[pygame.K_RIGHT]:
-                if self.checkRightBounds(self.__playerTwo) and not self.__playerTwo.rect.collidepoint(self.__playerOne.rect.midleft):
-                    self.__playerTwo.move_right()
+                if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(self.playerOne.rect.midleft):
+                    self.playerTwo.move_right()
                 else:
-                    self.__playerTwo.bounce_back("left")
+                    self.playerTwo.bounce_back("left")
 
             if keys[pygame.K_a]:
-                if self.checkLeftBounds(self.__playerOne) and not self.__playerOne.rect.collidepoint(self.__playerTwo.rect.midright):
-                    self.__playerOne.move_left()
+                if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(self.playerTwo.rect.midright):
+                    self.playerOne.move_left()
                 else:
-                    self.__playerOne.bounce_back("right")
+                    self.playerOne.bounce_back("right")
 
             if keys[pygame.K_d]:
-                if self.checkRightBounds(self.__playerOne) and not self.__playerOne.rect.collidepoint(self.__playerTwo.rect.midleft):
-                    self.__playerOne.move_right()
+                if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(self.playerTwo.rect.midleft):
+                    self.playerOne.move_right()
                 else:
-                    self.__playerOne.bounce_back("left")
+                    self.playerOne.bounce_back("left")
 
-            if not self.__playerTwo.isJumping:
+            if not self.playerTwo.isJumping:
                 if keys[pygame.K_UP]:
-                    self.__playerTwo.isJumping = True
+                    self.playerTwo.isJumping = True
 
             else:
-                self.__playerTwo.jump()
+                self.playerTwo.jump()
 
-            if not self.__playerOne.isJumping:
+            if not self.playerOne.isJumping:
                 if keys[pygame.K_w]:
-                    self.__playerOne.isJumping = True
+                    self.playerOne.isJumping = True
 
             else:
-                self.__playerOne.jump()
+                self.playerOne.jump()
 
+            self.ball.move()
+            self.ball.bounce(self.screen, self.lower_bounds)
             # Update game logic and draw game objects
 
             # Update the display
@@ -114,9 +123,10 @@ class Game:
             pygame.display.update()
 
     def refresh(self):
-        self.__screen.blit(self.__background, (0, 0))
-        self.__playerOne.draw_player(self.__screen)
-        self.__playerTwo.draw_player(self.__screen)
+        self.screen.blit(self.background, (0, 0))
+        self.playerOne.draw_player(self.screen)
+        self.playerTwo.draw_player(self.screen)
+        self.ball.draw_ball(self.screen)
         pygame.display.flip()
 
     @staticmethod
