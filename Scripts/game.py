@@ -3,7 +3,7 @@ from pygame import image
 import os
 from player import Player
 from ball import Ball
-
+from goal import Goal
 
 class Game:
 
@@ -41,6 +41,9 @@ class Game:
         self.ball = Ball()
         self.ball.rect.x = 960
         self.ball.rect.y = 400
+
+        # self.goalOne = Goal(0, 360)
+        # self.goalTwo = Goal(self.screen.get_width() - self.goalOne.rect.width, 360)
 
         self.ball.draw_ball(self.screen)
         self.playerOne.draw_player(self.screen)
@@ -114,8 +117,17 @@ class Game:
             else:
                 self.playerOne.jump()
 
-            self.ball.move()
+            # for i, sprite1 in enumerate(self.all_sprites):
+            #     for sprite2 in self.all_sprites[i + 1:]:
+            #         Sprite_Physics.checkCollision(sprite1, sprite2)
+            self.checkCollision(self.ball, self.playerOne)
+            self.checkCollision(self.ball, self.playerTwo)
+
             self.ball.bounce(self.screen, self.lower_bounds)
+            self.ball.move()
+
+            # self.ball.bouncePlayer(self.playerOne, self.playerTwo)
+
             # Update game logic and draw game objects
 
             # Update the display

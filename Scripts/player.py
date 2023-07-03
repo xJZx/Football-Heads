@@ -10,7 +10,9 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.MAX_VELOCITY = 12
-        self.velocity_player = 10
+        self.velocity = 10
+
+        self.mass = 5
 
         self.isJumping = False
         self.jumpCount = 8

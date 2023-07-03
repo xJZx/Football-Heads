@@ -3,21 +3,22 @@ import random
 import pygame
 from pygame import image
 import os
+from sprite_physics import Sprite_Physics
 
 
-class Ball(pygame.sprite.Sprite):
+class Ball(Sprite_Physics):
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
 
-        self.velocity_ball = 10
-        self.gravity = (math.pi, 0.2)
-        self.drag = 0.999
-        self.elasticity = 0.75
+        Sprite_Physics.__init__(self)
+
+        self.velocity = 10
+
+        self.mass = 0.5
 
         self.game_path = os.getcwd()
         self.root_dir = os.path.dirname(self.game_path)
 
-        self.angle_ball = random.uniform(0, math.pi*2)
+        self.angle = random.uniform(0, math.pi*2)
 
         # self.ball_state
 
@@ -26,12 +27,12 @@ class Ball(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def move(self):
-        move_vector = (self.angle_ball, self.velocity_ball)
-        (self.angle_ball, self.velocity_ball) = self.add_vectors(move_vector, self.gravity)
-        self.velocity_ball *= self.drag
+        move_vector = (self.angle, self.velocity)
+        (self.angle, self.velocity) = self.add_vectors(move_vector, Sprite_Physics.gravity)
+        self.velocity *= Sprite_Physics.drag
 
-        self.rect.x += math.sin(self.angle_ball) * self.velocity_ball
-        self.rect.y -= math.cos(self.angle_ball) * self.velocity_ball
+        self.rect.x += math.sin(self.angle) * self.velocity
+        self.rect.y -= math.cos(self.angle) * self.velocity
 
     @staticmethod
     def add_vectors(vector1, vector2):
