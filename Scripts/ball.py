@@ -1,7 +1,6 @@
 import math
 import random
 import pygame
-from pygame import image
 import os
 from sprite_physics import Sprite_Physics
 
@@ -48,21 +47,69 @@ class Ball(Sprite_Physics):
     def bounce(self, screen, lower_bounds):
         if self.rect.x > screen.get_width() - self.rect.width:
             self.rect.x = 2 * (screen.get_width() - self.rect.width) - self.rect.x
-            self.angle_ball = - self.angle_ball
-            self.velocity_ball *= self.elasticity
-        elif self.rect.x < self.velocity_ball:
-            self.rect.x = 2 * self.velocity_ball - self.rect.x
-            self.angle_ball = - self.angle_ball
-            self.velocity_ball *= self.elasticity
+            self.angle = - self.angle
+            self.velocity *= Sprite_Physics.elasticity
+        elif self.rect.x < self.velocity:
+            self.rect.x = 2 * self.velocity - self.rect.x
+            self.angle = - self.angle
+            self.velocity *= Sprite_Physics.elasticity
 
         if self.rect.y > lower_bounds - self.rect.height:
             self.rect.y = 2 * (lower_bounds - self.rect.height) - self.rect.y
-            self.angle_ball = math.pi - self.angle_ball
-            self.velocity_ball *= self.elasticity
-        elif self.rect.y < self.velocity_ball:
-            self.rect.y = 2 * self.velocity_ball - self.rect.y
-            self.angle_ball = math.pi - self.angle_ball
-            self.velocity_ball *= self.elasticity
+            self.angle = math.pi - self.angle
+            self.velocity *= Sprite_Physics.elasticity
+        elif self.rect.y < self.velocity:
+            self.rect.y = 2 * self.velocity - self.rect.y
+            self.angle = math.pi - self.angle
+            self.velocity *= Sprite_Physics.elasticity
+
+    def bouncePost(self, goalPost):
+        pass
+
+
+    def bounce_back(self, bouncing_side):
+        if bouncing_side == 'left':
+            self.rect.x -= 15
+
+        elif bouncing_side == 'up':
+            self.rect.y += 15
+
+        elif bouncing_side == 'right':
+            self.rect.x += 15
+
+        elif bouncing_side == 'down':
+            pass
+
+    def bouncePlayer(self, playerOne, playerTwo):
+        if self.rect.colliderect(playerOne.rect):
+            self.angle = - self.angle
+            self.velocity *= Sprite_Physics.elasticity
+
+            if playerOne.rect.x > self.rect.x:
+                self.bounce_back('left')
+
+            elif playerOne.rect.x < self.rect.x:
+                self.bounce_back('right')
+
+            elif playerOne.rect.y < self.rect.y:
+                self.bounce_back('up')
+
+            self.move()
+
+        if self.rect.colliderect(playerTwo.rect):
+            self.angle = - self.angle
+            self.velocity *= Sprite_Physics.elasticity
+
+            if playerTwo.rect.x > self.rect.x:
+                self.bounce_back('left')
+
+            elif playerTwo.rect.x < self.rect.x:
+                self.bounce_back('right')
+
+            elif playerTwo.rect.y < self.rect.y:
+                self.bounce_back('up')
+
+            self.move()
 
     def draw_ball(self, screen):
         screen.blit(self.image, self.rect)

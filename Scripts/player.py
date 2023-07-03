@@ -1,25 +1,27 @@
+import math
+import random
 import pygame
-from pygame import image
 import os
 
+from sprite_physics import Sprite_Physics
 
-class Player(pygame.sprite.Sprite):
+
+class Player(Sprite_Physics):
 
     def __init__(self, player_side):
 
-        pygame.sprite.Sprite.__init__(self)
+        Sprite_Physics.__init__(self)
 
         self.MAX_VELOCITY = 12
         self.velocity = 10
 
         self.mass = 5
 
+        self.angle = math.pi / 2
+
         self.isJumping = False
         self.jumpCount = 8
         self.currentJumpCount = self.jumpCount
-
-        self.MAX_JUMP = 300
-        self.GROUND_LEVEL = 400
 
         self.MAX_FOOT_ANGLE = 90
         self.foot_angle = 0
@@ -41,11 +43,35 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load(self.default_texture_path).convert_alpha()
         self.rect = self.image.get_rect()
 
+    @staticmethod
+    def add_vectors(vector1, vector2):
+        x = math.sin(vector1[0]) * vector1[1] + math.sin(vector2[0]) * vector1[1]
+        y = math.cos(vector1[0]) * vector1[1] + math.cos(vector2[0]) * vector2[1]
+
+        length = math.hypot(x, y)
+        angle = 0.5 * math.pi - math.atan2(y, x)
+        return_vector = (angle, length)
+
+        return return_vector
+
     def move_left(self):
-        self.rect.x -= self.velocity_player
+        self.rect.x -= self.velocity
+
+        # move_vector = (self.angle, self.velocity)
+        # (self.angle, self.velocity) = self.add_vectors(move_vector, Sprite_Physics.gravity)
+        # #self.velocity_player *= self.drag
+        #
+        # self.rect.x -= math.sin(self.angle) * self.velocity
+        #self.rect.y -= math.cos(self.angle) * self.velocity
 
     def move_right(self):
-        self.rect.x += self.velocity_player
+        self.rect.x += self.velocity
+
+        # move_vector = (self.angle, self.velocity)
+        # (self.angle, self.velocity) = self.add_vectors(move_vector, Sprite_Physics.gravity)
+        # # self.velocity_player *= self.drag
+        #
+        # self.rect.x += math.sin(self.angle) * self.velocity
 
     def bounce_back(self, bouncing_side):
         if bouncing_side == 'left':

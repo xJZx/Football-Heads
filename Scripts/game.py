@@ -1,6 +1,8 @@
+import math
 import pygame
-from pygame import image
 import os
+
+from sprite_physics import Sprite_Physics
 from player import Player
 from ball import Ball
 from goal import Goal
@@ -49,25 +51,59 @@ class Game:
         self.playerOne.draw_player(self.screen)
         self.playerTwo.draw_player(self.screen)
 
-        # all_sprites = pygame.sprite.Group([self.playerOne, self.playerTwo])
+        self.all_sprites = [self.playerOne, self.playerTwo, self.ball]
+        # all_sprites = pygame.sprite.Group()
 
         # Update the display
         pygame.display.flip()
 
+    @staticmethod
+    def add_vectors(vector1, vector2):
+        x = math.sin(vector1[0]) * vector1[1] + math.sin(vector2[0]) * vector1[1]
+        y = math.cos(vector1[0]) * vector1[1] + math.cos(vector2[0]) * vector2[1]
+
+        length = math.hypot(x, y)
+        angle = 0.5 * math.pi - math.atan2(y, x)
+        return_vector = (angle, length)
+
+        return return_vector
+
+    def checkCollision(self, ball, player):
+        dx = ball.rect.x - player.rect.x
+        dy = ball.rect.y - player.rect.y
+
+        distance = math.hypot(dx, dy)
+        if distance < player.rect.width:  # ball.rect.width +
+            tangent = math.atan2(dy, dx)
+
+            angle = 0.5 * math.pi + tangent
+
+            total_mass = ball.mass + player.mass
+            # sprite_one.angle = 2 * tangent - sprite_one.angle
+            # sprite_two.angle = 2 * tangent - sprite_two.angle
+
+            # ball gets the angle calculated from tangent and the current velocity of the player as zderzenie sprezyste
+            (ball.angle, ball.velocity) = (angle, 2 * player.velocity * player.mass / total_mass)
+            # lower the speed of ball by elasticity, otherwise would start getting constantly faster with every other bounce
+            ball.velocity *= Sprite_Physics.elasticity
+            # sprite_two.velocity *= Sprite_Physics.elasticity
+
+            ball.rect.x += math.sin(angle)
+            ball.rect.y -= math.cos(angle)
+            # sprite_two.rect.x -= math.sin(angle)
+            # sprite_two.rect.y += math.cos(angle)
+
     def checkLeftBounds(self, sprite):
-        if sprite.rect.x > sprite.velocity_player:
+        if sprite.rect.x > sprite.velocity:
             return True
 
         return False
 
     def checkRightBounds(self, sprite):
-        if sprite.rect.x < self.screen.get_width() - sprite.velocity_player - sprite.rect.width:
+        if sprite.rect.x < self.screen.get_width() - sprite.velocity - sprite.rect.width:
             return True
 
         return False
-
-    def checkCollision(self, sprite_one, sprite_two):
-        pass
 
     def run(self):
         # Add game loop if needed
@@ -82,26 +118,26 @@ class Game:
             if keys[pygame.K_LEFT]:
                 if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(self.playerOne.rect.midright):
                     self.playerTwo.move_left()
-                else:
-                    self.playerTwo.bounce_back("right")
+                # else:
+                #     self.playerTwo.bounce_back("right")
 
             if keys[pygame.K_RIGHT]:
                 if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(self.playerOne.rect.midleft):
                     self.playerTwo.move_right()
-                else:
-                    self.playerTwo.bounce_back("left")
+                # else:
+                #     self.playerTwo.bounce_back("left")
 
             if keys[pygame.K_a]:
                 if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(self.playerTwo.rect.midright):
                     self.playerOne.move_left()
-                else:
-                    self.playerOne.bounce_back("right")
+                # else:
+                #     self.playerOne.bounce_back("right")
 
             if keys[pygame.K_d]:
                 if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(self.playerTwo.rect.midleft):
                     self.playerOne.move_right()
-                else:
-                    self.playerOne.bounce_back("left")
+                # else:
+                #     self.playerOne.bounce_back("left")
 
             if not self.playerTwo.isJumping:
                 if keys[pygame.K_UP]:
