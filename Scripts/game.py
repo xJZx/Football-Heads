@@ -44,12 +44,17 @@ class Game:
         self.ball.rect.x = 960
         self.ball.rect.y = 400
 
-        # self.goalOne = Goal(0, 360)
-        # self.goalTwo = Goal(self.screen.get_width() - self.goalOne.rect.width, 360)
+        self.goalOne = Goal(0, 360)
+        self.goalTwo = Goal(self.screen.get_width() - self.goalOne.rect.width, 360)
+
+        print(self.goalOne.rect.width)
+        print(self.goalOne.rect.height)
 
         self.ball.draw_ball(self.screen)
         self.playerOne.draw_player(self.screen)
         self.playerTwo.draw_player(self.screen)
+        self.goalOne.draw_goal(self.screen)
+        self.goalTwo.draw_goal(self.screen)
 
         self.all_sprites = [self.playerOne, self.playerTwo, self.ball]
         # all_sprites = pygame.sprite.Group()
@@ -156,8 +161,9 @@ class Game:
             # for i, sprite1 in enumerate(self.all_sprites):
             #     for sprite2 in self.all_sprites[i + 1:]:
             #         Sprite_Physics.checkCollision(sprite1, sprite2)
-            self.checkCollision(self.ball, self.playerOne)
-            self.checkCollision(self.ball, self.playerTwo)
+            self.checkCollisionPlayer(self.ball, self.playerOne)
+            self.checkCollisionPlayer(self.ball, self.playerTwo)
+            self.checkCollisionGoalTwo()
 
             self.ball.bounce(self.screen, self.lower_bounds)
             self.ball.move()
@@ -175,6 +181,8 @@ class Game:
         self.playerOne.draw_player(self.screen)
         self.playerTwo.draw_player(self.screen)
         self.ball.draw_ball(self.screen)
+        self.goalOne.draw_goal(self.screen)
+        self.goalTwo.draw_goal(self.screen)
         pygame.display.flip()
 
     @staticmethod
