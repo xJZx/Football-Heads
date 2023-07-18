@@ -12,7 +12,7 @@ class Ball(Sprite_Physics):
 
         self.velocity = 10
 
-        self.mass = 0.5
+        self.mass = 0.1
 
         self.game_path = os.getcwd()
         self.root_dir = os.path.dirname(self.game_path)
@@ -66,50 +66,14 @@ class Ball(Sprite_Physics):
     def bouncePost(self, goalPost):
         pass
 
-
-    def bounce_back(self, bouncing_side):
-        if bouncing_side == 'left':
-            self.rect.x -= 15
-
-        elif bouncing_side == 'up':
-            self.rect.y += 15
-
-        elif bouncing_side == 'right':
-            self.rect.x += 15
-
-        elif bouncing_side == 'down':
-            pass
-
-    def bouncePlayer(self, playerOne, playerTwo):
-        if self.rect.colliderect(playerOne.rect):
-            self.angle = - self.angle
-            self.velocity *= Sprite_Physics.elasticity
-
-            if playerOne.rect.x > self.rect.x:
-                self.bounce_back('left')
-
-            elif playerOne.rect.x < self.rect.x:
-                self.bounce_back('right')
-
-            elif playerOne.rect.y < self.rect.y:
-                self.bounce_back('up')
-
-            self.move()
-
-        if self.rect.colliderect(playerTwo.rect):
-            self.angle = - self.angle
-            self.velocity *= Sprite_Physics.elasticity
-
-            if playerTwo.rect.x > self.rect.x:
-                self.bounce_back('left')
-
-            elif playerTwo.rect.x < self.rect.x:
-                self.bounce_back('right')
-
-            elif playerTwo.rect.y < self.rect.y:
-                self.bounce_back('up')
-
-            self.move()
+    def rotate_image(self):
+        rotated_image = pygame.transform.rotate(self.image, self.angle * -90)
+        new_rect = rotated_image.get_rect()
+        return rotated_image
 
     def draw_ball(self, screen):
-        screen.blit(self.image, self.rect)
+        rotated_image = pygame.transform.rotate(self.image, (self.angle * -180) / math.pi)
+        new_rect = rotated_image.get_rect()
+        # (self.rect.x - new_rect.center[0], self.rect.y - new_rect.center[1])  V down
+        # screen.blit(rotated_image, self.rect)
+        screen.blit(rotated_image, (self.rect.x - new_rect.center[0], self.rect.y - new_rect.center[1]))

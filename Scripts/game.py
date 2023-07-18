@@ -7,6 +7,7 @@ from player import Player
 from ball import Ball
 from goal import Goal
 
+
 class Game:
 
     # Methods
@@ -73,28 +74,85 @@ class Game:
 
         return return_vector
 
-    def checkCollision(self, ball, player):
-        dx = ball.rect.x - player.rect.x
-        dy = ball.rect.y - player.rect.y
+    def checkCollisionPlayer(self, ball, player):
+        dx = ball.rect.centerx - player.rect.centerx
+        dy = ball.rect.centery - player.rect.centery
+        print('dx=', dx)
+        print('dy=', dy)
 
         distance = math.hypot(dx, dy)
-        if distance < player.rect.width:  # ball.rect.width +
+        print('distance=', distance)
+        if distance < player.rect.width / 2 + ball.rect.width / 2:  # ball.rect.width +
             tangent = math.atan2(dy, dx)
 
             angle = 0.5 * math.pi + tangent
 
             total_mass = ball.mass + player.mass
+
+            # ball gets the angle calculated from tangent and the current velocity of the player as zderzenie sprezyste
+            (ball.angle, ball.velocity) = (angle, 2 * abs(player.velocity) * player.mass / total_mass + ball.velocity)
+            # lower the speed of ball by elasticity,
+            # otherwise would start getting constantly faster with every other bounce
+            ball.velocity *= Sprite_Physics.elasticity
+
+            ball.rect.x += math.sin(angle)
+            ball.rect.y -= math.cos(angle)
+
+    # def checkCollisionPlayer(self, ball, player):
+    #     dx = ball.rect.x - player.rect.x
+    #     dy = ball.rect.y - player.rect.y
+    #
+    #     distance = math.hypot(dx, dy)
+    #     if distance < player.rect.width:  # ball.rect.width +
+    #         tangent = math.atan2(dy, dx)
+    #
+    #         angle = 0.5 * math.pi + tangent
+    #
+    #         total_mass = ball.mass + player.mass
+    #
+    #         # ball gets the angle calculated from tangent and the current velocity of the player as zderzenie sprezyste
+    #         (ball.angle, ball.velocity) = (angle, 2 * abs(player.velocity) * player.mass / total_mass + ball.velocity)
+    #         # lower the speed of ball by elasticity,
+    #         # otherwise would start getting constantly faster with every other bounce
+    #         ball.velocity *= Sprite_Physics.elasticity
+    #
+    #         ball.rect.x += math.sin(angle)
+    #         ball.rect.y -= math.cos(angle)
+
+    def checkCollisionGoalTwo(self):
+        dx = abs(self.ball.rect.x - self.goalTwo.rect.x)
+        dy = abs(self.ball.rect.y - self.goalTwo.rect.y)
+
+        ballCentreX = self.ball.rect.x + self.ball.rect.width / 2
+        ballCentreY = self.ball.rect.y + self.ball.rect.height / 2
+
+        ballRadius = self.ball.rect.height / 2
+
+        C = -self.goalTwo.rect.y
+
+        pointDist = abs(ballCentreY + C)
+
+        distance = math.hypot(dx, dy)
+
+        if self.ball.rect.x + self.ball.rect.width > self.goalTwo.rect.x and pointDist < ballRadius:
+            tangent = math.atan2(dy, dx)
+
+            angle = 0.5 * math.pi + tangent
+
+            total_mass = self.ball.mass + self.goalTwo.mass
             # sprite_one.angle = 2 * tangent - sprite_one.angle
             # sprite_two.angle = 2 * tangent - sprite_two.angle
 
             # ball gets the angle calculated from tangent and the current velocity of the player as zderzenie sprezyste
-            (ball.angle, ball.velocity) = (angle, 2 * player.velocity * player.mass / total_mass)
+            (self.ball.angle, self.ball.velocity) = (angle, 2 * self.ball.velocity * self.goalTwo.mass / total_mass)
             # lower the speed of ball by elasticity, otherwise would start getting constantly faster with every other bounce
-            ball.velocity *= Sprite_Physics.elasticity
+            self.ball.velocity *= Sprite_Physics.elasticity
             # sprite_two.velocity *= Sprite_Physics.elasticity
 
-            ball.rect.x += math.sin(angle)
-            ball.rect.y -= math.cos(angle)
+            self.ball.rect.x += math.sin(angle)
+            self.ball.rect.y -= math.cos(angle)
+
+            print("BUMP")
             # sprite_two.rect.x -= math.sin(angle)
             # sprite_two.rect.y += math.cos(angle)
 
@@ -112,37 +170,114 @@ class Game:
 
     def run(self):
         # Add game loop if needed
+        left_down = False
+        right_down = False
+        a_down = False
+        d_down = False
         while True:
             pygame.time.delay(20)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-
                     # sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        print("L DOWN")
+                        left_down = True
+
+                    elif event.key == pygame.K_RIGHT:
+                        print("R DOWN")
+                        right_down = True
+
+                    elif event.key == pygame.K_a:
+                        print("A DOWN")
+                        a_down = True
+
+                    elif event.key == pygame.K_d:
+                        print("D DOWN")
+                        d_down = True
+
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_LEFT:
+                        print("L UP")
+                        left_down = False
+
+                    elif event.key == pygame.K_RIGHT:
+                        print("R UP")
+                        right_down = False
+
+                    elif event.key == pygame.K_a:
+                        print("A UP")
+                        a_down = False
+
+                    elif event.key == pygame.K_d:
+                        print("D UP")
+                        d_down = False
+
+            if left_down:
+                print("L DOWN")
+                if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                        self.playerOne.rect.midright):
+                    if self.playerTwo.velocity >= -self.playerTwo.MAX_VELOCITY:
+                        self.playerTwo.velocity -= self.playerTwo.acceleration
+                    self.playerTwo.move()
+            else:
+                print("L UP")
+                if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                        self.playerOne.rect.midright):
+                    if self.playerTwo.velocity < 0:
+                        self.playerTwo.velocity += self.playerTwo.acceleration
+                        self.playerTwo.move()
+
+            if right_down:
+                print("R DOWN")
+                if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                        self.playerOne.rect.midleft):
+                    if self.playerTwo.velocity <= self.playerTwo.MAX_VELOCITY:
+                        self.playerTwo.velocity += self.playerTwo.acceleration
+                    self.playerTwo.move()
+            else:
+                print("R UP")
+                if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                        self.playerOne.rect.midleft):
+                    if self.playerTwo.velocity > 0:
+                        self.playerTwo.velocity -= self.playerTwo.acceleration
+                        self.playerTwo.move()
+
+            if a_down:
+                print("A DOWN")
+                if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                        self.playerTwo.rect.midright):
+                    if self.playerOne.velocity >= -self.playerOne.MAX_VELOCITY:
+                        self.playerOne.velocity -= self.playerOne.acceleration
+                    self.playerOne.move()
+            else:
+                print("A UP")
+                if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                        self.playerTwo.rect.midright):
+                    if self.playerOne.velocity < 0:
+                        self.playerOne.velocity += self.playerOne.acceleration
+                        self.playerOne.move()
+
+            if d_down:
+                print("D DOWN")
+                if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                        self.playerTwo.rect.midleft):
+                    if self.playerOne.velocity <= self.playerOne.MAX_VELOCITY:
+                        self.playerOne.velocity += self.playerOne.acceleration
+                    self.playerOne.move()
+            else:
+                print("D UP")
+                if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                        self.playerTwo.rect.midleft):
+                    if self.playerOne.velocity > 0:
+                        self.playerOne.velocity -= self.playerOne.acceleration
+                        self.playerOne.move()
+
+            print(self.playerOne.velocity)
+            print(self.playerTwo.velocity)
+
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT]:
-                if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(self.playerOne.rect.midright):
-                    self.playerTwo.move_left()
-                # else:
-                #     self.playerTwo.bounce_back("right")
-
-            if keys[pygame.K_RIGHT]:
-                if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(self.playerOne.rect.midleft):
-                    self.playerTwo.move_right()
-                # else:
-                #     self.playerTwo.bounce_back("left")
-
-            if keys[pygame.K_a]:
-                if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(self.playerTwo.rect.midright):
-                    self.playerOne.move_left()
-                # else:
-                #     self.playerOne.bounce_back("right")
-
-            if keys[pygame.K_d]:
-                if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(self.playerTwo.rect.midleft):
-                    self.playerOne.move_right()
-                # else:
-                #     self.playerOne.bounce_back("left")
 
             if not self.playerTwo.isJumping:
                 if keys[pygame.K_UP]:
@@ -184,7 +319,3 @@ class Game:
         self.goalOne.draw_goal(self.screen)
         self.goalTwo.draw_goal(self.screen)
         pygame.display.flip()
-
-    @staticmethod
-    def clip(val, min_val, max_val):
-        return min(max(val, min_val), max_val)

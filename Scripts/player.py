@@ -12,8 +12,10 @@ class Player(Sprite_Physics):
 
         Sprite_Physics.__init__(self)
 
-        self.MAX_VELOCITY = 12
-        self.velocity = 10
+        self.MAX_VELOCITY = 10
+        self.velocity = 0
+
+        self.acceleration = 0.5
 
         self.mass = 5
 
@@ -54,24 +56,8 @@ class Player(Sprite_Physics):
 
         return return_vector
 
-    def move_left(self):
-        self.rect.x -= self.velocity
-
-        # move_vector = (self.angle, self.velocity)
-        # (self.angle, self.velocity) = self.add_vectors(move_vector, Sprite_Physics.gravity)
-        # #self.velocity_player *= self.drag
-        #
-        # self.rect.x -= math.sin(self.angle) * self.velocity
-        #self.rect.y -= math.cos(self.angle) * self.velocity
-
-    def move_right(self):
+    def move(self):
         self.rect.x += self.velocity
-
-        # move_vector = (self.angle, self.velocity)
-        # (self.angle, self.velocity) = self.add_vectors(move_vector, Sprite_Physics.gravity)
-        # # self.velocity_player *= self.drag
-        #
-        # self.rect.x += math.sin(self.angle) * self.velocity
 
     def bounce_back(self, bouncing_side):
         if bouncing_side == 'left':
