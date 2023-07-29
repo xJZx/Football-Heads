@@ -74,6 +74,11 @@ class Ball(Sprite_Physics):
     def draw_ball(self, screen):
         rotated_image = pygame.transform.rotate(self.image, (self.angle * -180) / math.pi)
         new_rect = rotated_image.get_rect()
+        new_rect.centerx = new_rect.centerx - rotated_image.get_width() / 2
+        new_rect.centery = new_rect.centery - rotated_image.get_height() / 2
         # (self.rect.x - new_rect.center[0], self.rect.y - new_rect.center[1])  V down
         # screen.blit(rotated_image, self.rect)
         screen.blit(rotated_image, (self.rect.x - new_rect.center[0], self.rect.y - new_rect.center[1]))
+
+        # drew rect hitbox
+        pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)

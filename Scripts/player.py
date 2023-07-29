@@ -59,13 +59,6 @@ class Player(Sprite_Physics):
     def move(self):
         self.rect.x += self.velocity
 
-    def bounce_back(self, bouncing_side):
-        if bouncing_side == 'left':
-            self.rect.x -= 15
-
-        else:
-            self.rect.x += 15
-
     def jump(self):
         if self.currentJumpCount >= -self.jumpCount:
             neg = 1
@@ -86,3 +79,5 @@ class Player(Sprite_Physics):
 
     def draw_player(self, screen):
         screen.blit(self.image, self.rect)
+        # drew rect hitbox
+        pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)

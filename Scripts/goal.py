@@ -21,3 +21,6 @@ class Goal(pygame.sprite.Sprite):
 
     def draw_goal(self, screen):
         screen.blit(self.image, self.rect)
+
+        # drew rect hitbox
+        pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
