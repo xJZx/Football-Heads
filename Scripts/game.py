@@ -44,12 +44,10 @@ class Game:
         self.ball = Ball()
         self.ball.rect.x = 960
         self.ball.rect.y = 400
+        self.collisionTolerance = 10
 
         self.goalOne = Goal(0, 360)
         self.goalTwo = Goal(self.screen.get_width() - self.goalOne.rect.width, 360)
-
-        print(self.goalOne.rect.width)
-        print(self.goalOne.rect.height)
 
         self.ball.draw_ball(self.screen)
         self.playerOne.draw_player(self.screen)
@@ -120,39 +118,56 @@ class Game:
     #         ball.rect.y -= math.cos(angle)
 
     def checkCollisionGoalTwo(self):
-        dx = abs(self.ball.rect.x - self.goalTwo.rect.x)
-        dy = abs(self.ball.rect.y - self.goalTwo.rect.y)
-
-        ballCentreX = self.ball.rect.x + self.ball.rect.width / 2
-        ballCentreY = self.ball.rect.y + self.ball.rect.height / 2
-
-        ballRadius = self.ball.rect.height / 2
-
-        C = -self.goalTwo.rect.y
-
-        pointDist = abs(ballCentreY + C)
-
-        distance = math.hypot(dx, dy)
-
-        if self.ball.rect.x + self.ball.rect.width > self.goalTwo.rect.x and pointDist < ballRadius:
-            tangent = math.atan2(dy, dx)
-
-            angle = 0.5 * math.pi + tangent
-
-            total_mass = self.ball.mass + self.goalTwo.mass
-            # sprite_one.angle = 2 * tangent - sprite_one.angle
-            # sprite_two.angle = 2 * tangent - sprite_two.angle
-
-            # ball gets the angle calculated from tangent and the current velocity of the player as zderzenie sprezyste
-            (self.ball.angle, self.ball.velocity) = (angle, 2 * self.ball.velocity * self.goalTwo.mass / total_mass)
-            # lower the speed of ball by elasticity, otherwise would start getting constantly faster with every other bounce
-            self.ball.velocity *= Sprite_Physics.elasticity
-            # sprite_two.velocity *= Sprite_Physics.elasticity
-
-            self.ball.rect.x += math.sin(angle)
-            self.ball.rect.y -= math.cos(angle)
-
-            print("BUMP")
+        if self.ball.rect.colliderect(self.goalTwo):
+            if abs(self.goalTwo.rect.top - self.ball.rect.bottom) < self.collisionTolerance: # hit from top
+                self.ball.rect.y = 2 * (self.goalTwo.rect.y - self.ball.rect.height) - self.ball.rect.y
+                self.ball.angle = math.pi - self.ball.angle
+                self.ball.velocity *= Sprite_Physics.elasticity
+            if abs(self.goalTwo.rect.bottom - self.ball.rect.top) < self.collisionTolerance: # hit from bottom
+                self.ball.rect.y = 2 * self.ball.velocity - self.ball.rect.y
+                self.ball.angle = math.pi - self.ball.angle
+                self.ball.velocity *= Sprite_Physics.elasticity
+            if abs(self.goalTwo.rect.right - self.ball.rect.left) < self.collisionTolerance: # hit from right
+                self.ball.rect.x = 2 * self.ball.velocity - self.ball.rect.x
+                self.ball.angle = - self.ball.angle
+                self.ball.velocity *= Sprite_Physics.elasticity
+            if abs(self.goalTwo.rect.left - self.ball.rect.right) < self.collisionTolerance: # hit from top
+                self.ball.rect.x = 2 * (self.goalTwo.rect.width - self.ball.rect.width) - self.ball.rect.x
+                self.ball.angle = - self.ball.angle
+                self.ball.velocity *= Sprite_Physics.elasticity
+        # dx = abs(self.ball.rect.x - self.goalTwo.rect.x)
+        # dy = abs(self.ball.rect.y - self.goalTwo.rect.y)
+        #
+        # ballCentreX = self.ball.rect.x + self.ball.rect.width / 2
+        # ballCentreY = self.ball.rect.y + self.ball.rect.height / 2
+        #
+        # ballRadius = self.ball.rect.height / 2
+        #
+        # C = -self.goalTwo.rect.y
+        #
+        # pointDist = abs(ballCentreY + C)
+        #
+        # distance = math.hypot(dx, dy)
+        #
+        # if self.ball.rect.x + self.ball.rect.width > self.goalTwo.rect.x and pointDist < ballRadius:
+        #     tangent = math.atan2(dy, dx)
+        #
+        #     angle = 0.5 * math.pi + tangent
+        #
+        #     total_mass = self.ball.mass + self.goalTwo.mass
+        #     # sprite_one.angle = 2 * tangent - sprite_one.angle
+        #     # sprite_two.angle = 2 * tangent - sprite_two.angle
+        #
+        #     # ball gets the angle calculated from tangent and the current velocity of the player as zderzenie sprezyste
+        #     (self.ball.angle, self.ball.velocity) = (angle, 2 * self.ball.velocity * self.goalTwo.mass / total_mass)
+        #     # lower the speed of ball by elasticity, otherwise would start getting constantly faster with every other bounce
+        #     self.ball.velocity *= Sprite_Physics.elasticity
+        #     # sprite_two.velocity *= Sprite_Physics.elasticity
+        #
+        #     self.ball.rect.x += math.sin(angle)
+        #     self.ball.rect.y -= math.cos(angle)
+        #
+        #     print("BUMP")
             # sprite_two.rect.x -= math.sin(angle)
             # sprite_two.rect.y += math.cos(angle)
 
@@ -258,8 +273,8 @@ class Game:
                         self.playerOne.velocity -= self.playerOne.acceleration
                         self.playerOne.move()
 
-            print(self.playerOne.velocity)
-            print(self.playerTwo.velocity)
+            #print(self.playerOne.velocity)
+            #print(self.playerTwo.velocity)
 
             keys = pygame.key.get_pressed()
 
