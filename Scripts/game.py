@@ -119,22 +119,26 @@ class Game:
 
     def checkCollisionGoalTwo(self):
         if self.ball.rect.colliderect(self.goalTwo):
-            if abs(self.goalTwo.rect.top - self.ball.rect.bottom) < self.collisionTolerance: # hit from top
-                self.ball.rect.y = 2 * (self.goalTwo.rect.y - self.ball.rect.height) - self.ball.rect.y
+
+            if abs(self.goalTwo.rect.top - self.ball.rect.bottom) < self.ball.velocity + self.collisionTolerance and (math.pi / 2) < abs(self.ball.angle) < (math.pi * 1.5): # hit from top
+                self.ball.rect.y = 2 * abs(self.goalTwo.rect.y - self.ball.rect.height) - self.ball.rect.y
                 self.ball.angle = math.pi - self.ball.angle
                 self.ball.velocity *= Sprite_Physics.elasticity
-            if abs(self.goalTwo.rect.bottom - self.ball.rect.top) < self.collisionTolerance: # hit from bottom
-                self.ball.rect.y = 2 * self.ball.velocity - self.ball.rect.y
+
+            if abs(self.goalTwo.rect.bottom - self.ball.rect.top) < self.ball.velocity + self.collisionTolerance and 0 < abs(self.ball.angle) < (math.pi / 2): # hit from bottom
+                # self.ball.rect.y = 2 * self.ball.velocity - self.ball.rect.y
+                # self.ball.angle = math.pi - self.ball.angle
+                # self.ball.velocity *= Sprite_Physics.elasticity
+                # self.ball.rect.y = 2 * abs(self.ball.rect.height - self.goalTwo.rect.y) - self.ball.rect.y
                 self.ball.angle = math.pi - self.ball.angle
                 self.ball.velocity *= Sprite_Physics.elasticity
-            if abs(self.goalTwo.rect.right - self.ball.rect.left) < self.collisionTolerance: # hit from right
-                self.ball.rect.x = 2 * self.ball.velocity - self.ball.rect.x
-                self.ball.angle = - self.ball.angle
-                self.ball.velocity *= Sprite_Physics.elasticity
-            if abs(self.goalTwo.rect.left - self.ball.rect.right) < self.collisionTolerance: # hit from top
+                print("BOTTOM COLLISION!!!!!")
+
+            if abs(self.goalTwo.rect.left - self.ball.rect.right) < self.collisionTolerance and 0 < abs(self.ball.angle) < math.pi: # hit from top
                 self.ball.rect.x = 2 * (self.goalTwo.rect.width - self.ball.rect.width) - self.ball.rect.x
                 self.ball.angle = - self.ball.angle
                 self.ball.velocity *= Sprite_Physics.elasticity
+
         # dx = abs(self.ball.rect.x - self.goalTwo.rect.x)
         # dy = abs(self.ball.rect.y - self.goalTwo.rect.y)
         #
@@ -301,7 +305,7 @@ class Game:
 
             self.ball.bounce(self.screen, self.lower_bounds)
             self.ball.move()
-            print(self.ball.velocity)
+            #print(self.ball.velocity)
 
             # self.ball.bouncePlayer(self.playerOne, self.playerTwo)
 

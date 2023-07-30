@@ -82,3 +82,7 @@ class Ball(Sprite_Physics):
 
         # draw rect hitbox
         pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
+
+        # draw vectors
+        # pygame.draw.line(screen, (0, 255, 0), self.rect.center, )
+        print(self.angle * 180 / math.pi)
