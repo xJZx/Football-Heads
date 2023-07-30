@@ -79,5 +79,5 @@ class Player(Sprite_Physics):
 
     def draw_player(self, screen):
         screen.blit(self.image, self.rect)
-        # drew rect hitbox
+        # draw rect hitbox
         pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
