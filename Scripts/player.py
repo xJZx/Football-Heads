@@ -1,5 +1,4 @@
 import math
-import random
 import pygame
 import os
 
@@ -24,6 +23,9 @@ class Player(Sprite_Physics):
         self.isJumping = False
         self.jumpCount = 8
         self.currentJumpCount = self.jumpCount
+        # self.F = self.jumpCount
+        self.lift_force = 0
+        # self.currentJumpCount = 0
 
         self.MAX_FOOT_ANGLE = 90
         self.foot_angle = 0
@@ -59,7 +61,21 @@ class Player(Sprite_Physics):
     def move(self):
         self.rect.x += self.velocity
 
+    # def jump(self):
+    #     if self.currentJumpCount >= -self.jumpCount:
+    #         neg = 1
+    #         if self.currentJumpCount < 0:
+    #             neg = -1
+    #
+    #         self.rect.y -= (abs(self.currentJumpCount) ** 2) * neg
+    #         self.currentJumpCount -= 1
+    #     else:
+    #         self.currentJumpCount = self.jumpCount
+    #         self.isJumping = False
+
     def jump(self):
+        self.lift_force = self.currentJumpCount
+
         if self.currentJumpCount >= -self.jumpCount:
             neg = 1
             if self.currentJumpCount < 0:
@@ -67,8 +83,10 @@ class Player(Sprite_Physics):
 
             self.rect.y -= (abs(self.currentJumpCount) ** 2) * neg
             self.currentJumpCount -= 1
+            self.lift_force = self.currentJumpCount
         else:
             self.currentJumpCount = self.jumpCount
+            self.lift_force = 0
             self.isJumping = False
 
     def kick(self, press_time):

@@ -88,7 +88,7 @@ class Game:
             total_mass = ball.mass + player.mass
 
             # ball gets the angle calculated from tangent and the current velocity of the player as zderzenie sprezyste
-            (ball.angle, ball.velocity) = (angle, 2 * abs(player.velocity) * player.mass / total_mass + ball.velocity)
+            (ball.angle, ball.velocity) = (angle, 2 * abs(player.velocity + player.lift_force) * player.mass / total_mass + ball.velocity)
             # lower the speed of ball by elasticity,
             # otherwise would start getting constantly faster with every other bounce
             ball.velocity *= Sprite_Physics.elasticity
@@ -305,7 +305,9 @@ class Game:
 
             self.ball.bounce(self.screen, self.lower_bounds)
             self.ball.move()
-            #print(self.ball.velocity)
+            # print(self.ball.velocity)
+            # print(self.playerTwo.velocity)
+            # print(self.playerOne.velocity)
 
             # self.ball.bouncePlayer(self.playerOne, self.playerTwo)
 

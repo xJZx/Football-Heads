@@ -85,4 +85,5 @@ class Ball(Sprite_Physics):
 
         # draw vectors
         # pygame.draw.line(screen, (0, 255, 0), self.rect.center, )
-        print(self.angle * 180 / math.pi)
+
+        # print(self.angle * 180 / math.pi)
