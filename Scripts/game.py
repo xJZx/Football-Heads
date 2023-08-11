@@ -2,10 +2,11 @@ import math
 import pygame
 import os
 
+from Scripts.goal import Goal
 from sprite_physics import Sprite_Physics
 from player import Player
 from ball import Ball
-from goal import Goal
+from post import Post
 
 
 class Game:
@@ -15,7 +16,7 @@ class Game:
     def __init__(self):
         self.game_path = os.getcwd()
         self.root_dir = os.path.dirname(self.game_path)
-        background_image_path = os.path.join(self.root_dir, r'Textures\stadium.jpg')
+        background_image_path = os.path.join(self.root_dir, r'Textures\stadium_snow.jpg')
 
         # Initialize Pygame
         pygame.init()
@@ -46,12 +47,17 @@ class Game:
         self.ball.rect.y = 400
         self.collisionTolerance = 10
 
-        self.goalOne = Goal(0, 360)
-        self.goalTwo = Goal(self.screen.get_width() - self.goalOne.rect.width, 360)
+        self.postOne = Post(0, 360)
+        self.postTwo = Post(self.screen.get_width() - self.postOne.rect.width, 360)
+
+        self.goalOne = Goal(0, 360, 'left')
+        self.goalTwo = Goal(self.screen.get_width() - self.goalOne.rect.width, 360, 'right')
 
         self.ball.draw_ball(self.screen)
         self.playerOne.draw_player(self.screen)
         self.playerTwo.draw_player(self.screen)
+        self.postOne.draw_post(self.screen)
+        self.postTwo.draw_post(self.screen)
         self.goalOne.draw_goal(self.screen)
         self.goalTwo.draw_goal(self.screen)
 
@@ -96,47 +102,50 @@ class Game:
             ball.rect.x += math.sin(angle)
             ball.rect.y -= math.cos(angle)
 
-    def checkCollisionGoalOne(self):
-        if self.ball.rect.colliderect(self.goalOne):
+    def checkCollisionPostOne(self):
+        if self.ball.rect.colliderect(self.postOne):
 
-            if abs(self.goalOne.rect.top - self.ball.rect.bottom) < self.ball.velocity + self.collisionTolerance and (math.pi / 2) < self.ball.angle < (math.pi * 1.5): # hit from top
+            if abs(self.postOne.rect.top - self.ball.rect.bottom) < self.ball.velocity + self.collisionTolerance and (math.pi / 2) < self.ball.angle < (math.pi * 1.5): # hit from top
                 self.ball.angle = math.pi - self.ball.angle
                 self.ball.velocity *= Sprite_Physics.elasticity
 
-            elif abs(self.goalOne.rect.bottom - self.ball.rect.top) < self.ball.velocity + self.collisionTolerance and 0 < abs(self.ball.angle) < (math.pi / 2): # hit from bottom
+            elif abs(self.postOne.rect.bottom - self.ball.rect.top) < self.ball.velocity + self.collisionTolerance and 0 < abs(self.ball.angle) < (math.pi / 2): # hit from bottom
                 self.ball.angle = math.pi - self.ball.angle
                 self.ball.velocity *= Sprite_Physics.elasticity
 
-            elif abs(self.goalOne.rect.right - self.ball.rect.left) < self.ball.velocity + self.collisionTolerance and (self.ball.angle < 0 or math.pi < self.ball.angle < (math.pi * 1.5)): # hit from right
+            elif abs(self.postOne.rect.right - self.ball.rect.left) < self.ball.velocity + self.collisionTolerance and (self.ball.angle <= 0 or math.pi <= self.ball.angle <= (math.pi * 1.5)): # hit from right
                 if self.ball.angle < 0:
                     self.ball.angle = -self.ball.angle
 
                 else:
                     self.ball.angle = math.pi - self.ball.angle
 
-                self.ball.velocity *= Sprite_Physics.elasticity
+            # self.ball.velocity *= Sprite_Physics.elasticity
 
-    def checkCollisionGoalTwo(self):
-        if self.ball.rect.colliderect(self.goalTwo):
+    def checkCollisionPostTwo(self):
+        if self.ball.rect.colliderect(self.postTwo):
 
-            if abs(self.goalTwo.rect.top - self.ball.rect.bottom) < self.ball.velocity + self.collisionTolerance and (math.pi / 2) < self.ball.angle < (math.pi * 1.5): # hit from top
+            if abs(self.postTwo.rect.top - self.ball.rect.bottom) < self.ball.velocity + self.collisionTolerance and (math.pi / 2) < self.ball.angle < (math.pi * 1.5): # hit from top
                 self.ball.angle = math.pi - self.ball.angle
                 self.ball.velocity *= Sprite_Physics.elasticity
 
-            elif abs(self.goalTwo.rect.bottom - self.ball.rect.top) < self.ball.velocity + self.collisionTolerance and 0 < abs(self.ball.angle) < (math.pi / 2): # hit from bottom
+            elif abs(self.postTwo.rect.bottom - self.ball.rect.top) < self.ball.velocity + self.collisionTolerance and 0 < abs(self.ball.angle) < (math.pi / 2): # hit from bottom
                 self.ball.angle = math.pi - self.ball.angle
                 self.ball.velocity *= Sprite_Physics.elasticity
 
-            elif abs(self.goalTwo.rect.left - self.ball.rect.right) < self.ball.velocity + self.collisionTolerance and 0 < self.ball.angle < math.pi: # hit from left
+            elif abs(self.postTwo.rect.left - self.ball.rect.right) < self.ball.velocity + self.collisionTolerance and 0 < self.ball.angle < math.pi: # hit from left
                 if 0 < self.ball.angle < math.pi:
                     self.ball.angle = -self.ball.angle
-
                 else:
                     self.ball.angle = math.pi + self.ball.angle
 
-                self.ball.velocity *= Sprite_Physics.elasticity
+            # self.ball.velocity *= Sprite_Physics.elasticity
 
+    def checkGoalLeft(self):
+        pass
 
+    def checkGoalRight(self):
+        pass
 
     def checkLeftBounds(self, sprite):
         if sprite.rect.x > sprite.velocity:
@@ -264,8 +273,8 @@ class Game:
             #         Sprite_Physics.checkCollision(sprite1, sprite2)
             self.checkCollisionPlayer(self.ball, self.playerOne)
             self.checkCollisionPlayer(self.ball, self.playerTwo)
-            self.checkCollisionGoalTwo()
-            self.checkCollisionGoalOne()
+            self.checkCollisionPostTwo()
+            self.checkCollisionPostOne()
 
             self.ball.bounce(self.screen, self.lower_bounds)
             self.ball.move()
@@ -286,6 +295,8 @@ class Game:
         self.playerOne.draw_player(self.screen)
         self.playerTwo.draw_player(self.screen)
         self.ball.draw_ball(self.screen)
+        self.postOne.draw_post(self.screen)
+        self.postTwo.draw_post(self.screen)
         self.goalOne.draw_goal(self.screen)
         self.goalTwo.draw_goal(self.screen)
         pygame.display.flip()
