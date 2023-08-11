@@ -115,10 +115,11 @@ class Game:
 
             elif abs(self.postOne.rect.right - self.ball.rect.left) < self.ball.velocity + self.collisionTolerance and (self.ball.angle <= 0 or math.pi <= self.ball.angle <= (math.pi * 1.5)): # hit from right
                 if self.ball.angle < 0:
-                    self.ball.angle = -self.ball.angle
+                    self.ball.angle = math.pi - self.ball.angle
 
                 else:
-                    self.ball.angle = math.pi - self.ball.angle
+                    self.ball.angle = -self.ball.angle
+
 
             # self.ball.velocity *= Sprite_Physics.elasticity
 
