@@ -143,10 +143,16 @@ class Game:
             # self.ball.velocity *= Sprite_Physics.elasticity
 
     def checkGoalLeft(self):
-        pass
+        if self.ball.rect.colliderect(self.goalOne) and abs(self.ball.rect.right - self.goalOne.rect.right) < self.ball.velocity:
+            if not self.scored:
+                self.scored = True
+                self.score[1] += 1
 
     def checkGoalRight(self):
-        pass
+        if self.ball.rect.colliderect(self.goalTwo) and abs(self.ball.rect.left - self.goalTwo.rect.left) < self.ball.velocity:
+            if not self.scored:
+                self.scored = True
+                self.score[0] += 1
 
     def checkLeftBounds(self, sprite):
         if sprite.rect.x > sprite.velocity:
@@ -198,7 +204,7 @@ class Game:
                     elif event.key == pygame.K_d:
                         d_down = False
 
-            if left_down:
+            if left_down and not right_down:
                 if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
                         self.playerOne.rect.midright):
                     if self.playerTwo.velocity >= -self.playerTwo.MAX_VELOCITY:
@@ -211,7 +217,7 @@ class Game:
                         self.playerTwo.velocity += self.playerTwo.acceleration
                         self.playerTwo.move()
 
-            if right_down:
+            if right_down and not left_down:
                 if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
                         self.playerOne.rect.midleft):
                     if self.playerTwo.velocity <= self.playerTwo.MAX_VELOCITY:
@@ -224,7 +230,7 @@ class Game:
                         self.playerTwo.velocity -= self.playerTwo.acceleration
                         self.playerTwo.move()
 
-            if a_down:
+            if a_down and not d_down:
                 if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
                         self.playerTwo.rect.midright):
                     if self.playerOne.velocity >= -self.playerOne.MAX_VELOCITY:
@@ -237,7 +243,7 @@ class Game:
                         self.playerOne.velocity += self.playerOne.acceleration
                         self.playerOne.move()
 
-            if d_down:
+            if d_down and not a_down:
                 if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
                         self.playerTwo.rect.midleft):
                     if self.playerOne.velocity <= self.playerOne.MAX_VELOCITY:

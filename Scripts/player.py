@@ -23,9 +23,7 @@ class Player(Sprite_Physics):
         self.isJumping = False
         self.jumpCount = 8
         self.currentJumpCount = self.jumpCount
-        # self.F = self.jumpCount
         self.lift_force = 0
-        # self.currentJumpCount = 0
 
         self.MAX_FOOT_ANGLE = 90
         self.foot_angle = 0
