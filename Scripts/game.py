@@ -61,6 +61,11 @@ class Game:
         self.goalOne.draw_goal(self.screen)
         self.goalTwo.draw_goal(self.screen)
 
+        self.scored = False
+
+        self.score = [0, 0]
+        self.my_font = pygame.font.SysFont("monospace", 82)
+
         self.all_sprites = [self.playerOne, self.playerTwo, self.ball]
         # all_sprites = pygame.sprite.Group()
 
@@ -165,6 +170,10 @@ class Game:
             return True
 
         return False
+
+    def display_score(self):
+        self.score_text = self.my_font.render(f"{self.score[0]} : {self.score[1]}", True, (0, 0, 255))
+        self.screen.blit(self.score_text, (845, 20))
 
     def run(self):
         # Add game loop if needed
@@ -282,9 +291,13 @@ class Game:
             self.checkCollisionPlayer(self.ball, self.playerTwo)
             self.checkCollisionPostTwo()
             self.checkCollisionPostOne()
+            self.checkGoalLeft()
+            self.checkGoalRight()
 
             self.ball.bounce(self.screen, self.lower_bounds)
             self.ball.move()
+            self.display_score()
+
             # print(self.ball.velocity)
             # print(self.playerTwo.velocity)
             # print(self.playerOne.velocity)
@@ -306,4 +319,5 @@ class Game:
         self.postTwo.draw_post(self.screen)
         self.goalOne.draw_goal(self.screen)
         self.goalTwo.draw_goal(self.screen)
+        self.display_score()
         pygame.display.flip()
