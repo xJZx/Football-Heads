@@ -35,6 +35,9 @@ class Game:
 
         self.lower_bounds = 760
 
+        self.footOffsetX = 60
+        self.footOffsetY = 130
+
         self.playerOne = Player("left")
         self.playerOne.rect.x = 100  # go to x
         self.playerOne.rect.y = self.lower_bounds - self.playerOne.rect.height  # go to y
@@ -362,6 +365,8 @@ class Game:
             self.checkCollisionPostOne()
             self.checkGoalLeft()
             self.checkGoalRight()
+            self.update_foot(self.playerOne, self.footOne)
+            self.update_foot(self.playerTwo, self.footTwo)
 
             self.ball.bounce(self.screen, self.lower_bounds)
             self.ball.move()
