@@ -25,20 +25,17 @@ class Player(Sprite_Physics):
         self.currentJumpCount = self.jumpCount
         self.lift_force = 0
 
-        self.MAX_FOOT_ANGLE = 90
-        self.foot_angle = 0
-
         self.game_path = os.getcwd()
         self.root_dir = os.path.dirname(self.game_path)
 
         self.player_side = player_side
 
         if self.player_side == "left":
-            self.default_texture_path = os.path.join(self.root_dir, 'Textures\player1_default_merged.png')
+            self.default_texture_path = os.path.join(self.root_dir, 'Textures\\footless_player_left.png')
             self.lost_texture_path = os.path.join(self.root_dir, 'Textures\player1_lost.jpg')
             self.won_texture_path = os.path.join(self.root_dir, 'Textures\player1_won.jpg')
         else:
-            self.default_texture_path = os.path.join(self.root_dir, 'Textures\player2_default_merged.png')
+            self.default_texture_path = os.path.join(self.root_dir, 'Textures\\footless_player_right.png')
             self.lost_texture_path = os.path.join(self.root_dir, 'Textures\player2_lost.jpg')
             self.won_texture_path = os.path.join(self.root_dir, 'Textures\player2_won.jpg')
 
@@ -86,9 +83,6 @@ class Player(Sprite_Physics):
             self.currentJumpCount = self.jumpCount
             self.lift_force = 0
             self.isJumping = False
-
-    def kick(self, press_time):
-        pass
 
     def change_state(self, target_state):
         pass

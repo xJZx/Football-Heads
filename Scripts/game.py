@@ -2,6 +2,7 @@ import math
 import pygame
 import os
 
+from Scripts.foot import Foot
 from Scripts.goal import Goal
 from sprite_physics import Sprite_Physics
 from player import Player
@@ -38,24 +39,34 @@ class Game:
         self.playerOne.rect.x = 100  # go to x
         self.playerOne.rect.y = self.lower_bounds - self.playerOne.rect.height  # go to y
 
+        self.footOne = Foot("left")
+        self.footOne.rect.x = self.playerOne.rect.x + self.footOffsetX
+        self.footOne.rect.y = self.playerOne.rect.y + self.footOffsetY
+
         self.playerTwo = Player("right")
         self.playerTwo.rect.x = 1600  # go to x
         self.playerTwo.rect.y = self.lower_bounds - self.playerTwo.rect.height  # go to y
+
+        self.footTwo = Foot("right")
+        self.footTwo.rect.x = self.playerTwo.rect.x - self.footOffsetX
+        self.footTwo.rect.y = self.playerTwo.rect.y + self.footOffsetY
 
         self.ball = Ball()
         self.ball.rect.x = 960
         self.ball.rect.y = 400
         self.collisionTolerance = 10
 
-        self.postOne = Post(0, 360)
-        self.postTwo = Post(self.screen.get_width() - self.postOne.rect.width, 360)
+        self.postOne = Post(0, 350)
+        self.postTwo = Post(self.screen.get_width() - self.postOne.rect.width, 350)
 
         self.goalOne = Goal(0, 360, 'left')
         self.goalTwo = Goal(self.screen.get_width() - self.goalOne.rect.width, 360, 'right')
 
         self.ball.draw_ball(self.screen)
         self.playerOne.draw_player(self.screen)
+        self.footOne.draw_foot(self.screen)
         self.playerTwo.draw_player(self.screen)
+        self.footTwo.draw_foot(self.screen)
         self.postOne.draw_post(self.screen)
         self.postTwo.draw_post(self.screen)
         self.goalOne.draw_goal(self.screen)
@@ -146,18 +157,46 @@ class Game:
                     self.ball.angle = math.pi + self.ball.angle
 
             # self.ball.velocity *= Sprite_Physics.elasticity
+    def invertImg(self, img):
+        """Inverts the colors of a pygame Screen"""
+
+        img.lock()
+
+        for x in range(img.get_width()):
+            for y in range(img.get_height()):
+                RGBA = img.get_at((x, y))
+                for i in range(3):
+                    # Invert RGB, but not Alpha
+                    RGBA[i] = 255 - RGBA[i]
+                img.set_at((x, y), RGBA)
+
+        img.unlock()
 
     def checkGoalLeft(self):
         if self.ball.rect.colliderect(self.goalOne) and abs(self.ball.rect.right - self.goalOne.rect.right) < self.ball.velocity:
             if not self.scored:
                 self.scored = True
                 self.score[1] += 1
+                self.invertImg(self.background)
+                self.invertImg(self.playerOne.image)
+                self.invertImg(self.playerTwo.image)
+                self.invertImg(self.goalOne.image)
+                self.invertImg(self.goalTwo.image)
+                self.invertImg(self.postOne.image)
+                self.invertImg(self.postTwo.image)
 
     def checkGoalRight(self):
         if self.ball.rect.colliderect(self.goalTwo) and abs(self.ball.rect.left - self.goalTwo.rect.left) < self.ball.velocity:
             if not self.scored:
                 self.scored = True
                 self.score[0] += 1
+                self.invertImg(self.background)
+                self.invertImg(self.playerOne.image)
+                self.invertImg(self.playerTwo.image)
+                self.invertImg(self.goalOne.image)
+                self.invertImg(self.goalTwo.image)
+                self.invertImg(self.postOne.image)
+                self.invertImg(self.postTwo.image)
 
     def checkLeftBounds(self, sprite):
         if sprite.rect.x > sprite.velocity:
@@ -175,12 +214,24 @@ class Game:
         self.score_text = self.my_font.render(f"{self.score[0]} : {self.score[1]}", True, (0, 0, 255))
         self.screen.blit(self.score_text, (845, 20))
 
+    def update_foot(self, player, foot):
+        if player.player_side == "left":
+            foot.rect.x = player.rect.x + self.footOffsetX
+        else:
+            foot.rect.x = player.rect.x - self.footOffsetX
+
+        foot.rect.y = player.rect.y + self.footOffsetY
+
     def run(self):
         # Add game loop if needed
         left_down = False
         right_down = False
+        kick_right = False
+
         a_down = False
         d_down = False
+        kick_left = False
+
         while True:
             pygame.time.delay(20)
             for event in pygame.event.get():
@@ -194,11 +245,17 @@ class Game:
                     elif event.key == pygame.K_RIGHT:
                         right_down = True
 
+                    elif event.key == pygame.K_p:
+                        kick_right = True
+
                     elif event.key == pygame.K_a:
                         a_down = True
 
                     elif event.key == pygame.K_d:
                         d_down = True
+
+                    elif event.key == pygame.K_SPACE:
+                        kick_left = True
 
                 elif event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:
@@ -207,11 +264,17 @@ class Game:
                     elif event.key == pygame.K_RIGHT:
                         right_down = False
 
+                    elif event.key == pygame.K_p:
+                        kick_right = False
+
                     elif event.key == pygame.K_a:
                         a_down = False
 
                     elif event.key == pygame.K_d:
                         d_down = False
+
+                    elif event.key == pygame.K_SPACE:
+                        kick_left = False
 
             if left_down and not right_down:
                 if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
@@ -265,6 +328,12 @@ class Game:
                         self.playerOne.velocity -= self.playerOne.acceleration
                         self.playerOne.move()
 
+            # if kick_right:
+            #     self.kick(self.playerTwo)
+            #
+            # if kick_left:
+            #     self.kick(self.playerOne)
+
             #print(self.playerOne.velocity)
             #print(self.playerTwo.velocity)
 
@@ -312,9 +381,11 @@ class Game:
 
     def refresh(self):
         self.screen.blit(self.background, (0, 0))
-        self.playerOne.draw_player(self.screen)
-        self.playerTwo.draw_player(self.screen)
         self.ball.draw_ball(self.screen)
+        self.playerOne.draw_player(self.screen)
+        self.footOne.draw_foot(self.screen)
+        self.playerTwo.draw_player(self.screen)
+        self.footTwo.draw_foot(self.screen)
         self.postOne.draw_post(self.screen)
         self.postTwo.draw_post(self.screen)
         self.goalOne.draw_goal(self.screen)
