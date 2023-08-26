@@ -33,6 +33,8 @@ class Foot(Sprite_Physics):
         self.pos = Vector2()
         self.offset = Vector2(50, 50)
 
+        self.mass = 1
+
     def rotate_foot(self):
         # rotate image
         self.image = pygame.transform.rotozoom(self.original_image, -self.foot_angle, 1)

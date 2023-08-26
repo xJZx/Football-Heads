@@ -129,8 +129,40 @@ class Game:
             ball.rect.x += math.sin(angle)
             ball.rect.y -= math.cos(angle)
 
-    def checkCollisionFoot(self, ball, foot):
-        pass
+    def checkCollisionFoot(self, ball, foot, player):
+        dx = ball.rect.centerx - foot.rect.centerx
+        dy = ball.rect.centery - foot.rect.centery
+
+        distance = math.hypot(dx, dy)
+
+        if distance < (foot.rect.width / 2 + ball.rect.width / 2) + ball.velocity:
+            if 0 < foot.foot_angle < 80:
+                tangent = math.atan2(dy, dx)
+
+                angle = 0.5 * math.pi + tangent
+
+                total_mass = ball.mass + foot.mass
+
+                (ball.angle, ball.velocity) = (angle, 2 * abs(player.velocity + player.jump_force) * foot.mass / total_mass + ball.velocity + foot.FOOT_ANGLE_VELOCITY)
+
+                ball.velocity *= Sprite_Physics.elasticity
+
+                ball.rect.x += math.sin(angle)
+                ball.rect.y -= math.cos(angle)
+
+            else:
+                tangent = math.atan2(dy, dx)
+
+                angle = 0.5 * math.pi + tangent
+
+                total_mass = ball.mass + foot.mass
+
+                (ball.angle, ball.velocity) = (angle, 2 * abs(player.velocity + player.jump_force) * foot.mass / total_mass + ball.velocity)
+
+                ball.velocity *= Sprite_Physics.elasticity
+
+                ball.rect.x += math.sin(angle)
+                ball.rect.y -= math.cos(angle)
 
     def checkCollisionPostOne(self):
         if self.ball.rect.colliderect(self.postOne):
@@ -382,13 +414,13 @@ class Game:
 
                 if kick_left and self.footOne.foot_angle > -self.footOne.MAX_FOOT_ANGLE:
                     self.left_foot_offset_Y -= 4
-                    self.left_foot_offset_X += 4
+                    self.left_foot_offset_X += 7.5
                     self.footOne.kick_left_foot()
                 else:
                     if self.footOne.foot_angle < 0:
                         self.footOne.foot_angle += self.footOne.FOOT_ANGLE_VELOCITY
                         self.left_foot_offset_Y += 4
-                        self.left_foot_offset_X -= 4
+                        self.left_foot_offset_X -= 7.5
                         self.footOne.rotate_foot()
 
             #print(self.footOne.foot_angle)
@@ -420,6 +452,8 @@ class Game:
             self.checkGoalRight()
             self.update_foot(self.playerOne, self.footOne)
             self.update_foot(self.playerTwo, self.footTwo)
+            self.checkCollisionFoot(self.ball, self.footOne, self.playerOne)
+            self.checkCollisionFoot(self.ball, self.footTwo, self.playerTwo)
             self.check_ball_speed()
             self.goal_animation()
 
