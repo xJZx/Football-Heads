@@ -12,8 +12,6 @@ class Foot(Sprite_Physics):
 
         Sprite_Physics.__init__(self)
 
-
-
         self.game_path = os.getcwd()
         self.root_dir = os.path.dirname(self.game_path)
 

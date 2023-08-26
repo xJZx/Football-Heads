@@ -32,12 +32,12 @@ class Player(Sprite_Physics):
 
         if self.player_side == "left":
             self.default_texture_path = os.path.join(self.root_dir, 'Textures\\footless_player_left.png')
-            self.lost_texture_path = os.path.join(self.root_dir, 'Textures\player1_lost.jpg')
-            self.won_texture_path = os.path.join(self.root_dir, 'Textures\player1_won.jpg')
+            self.lost_texture_path = os.path.join(self.root_dir, 'Textures\player1_lost.png')
+            self.won_texture_path = os.path.join(self.root_dir, 'Textures\player1_won.png')
         else:
             self.default_texture_path = os.path.join(self.root_dir, 'Textures\\footless_player_right.png')
-            self.lost_texture_path = os.path.join(self.root_dir, 'Textures\player2_lost.jpg')
-            self.won_texture_path = os.path.join(self.root_dir, 'Textures\player2_won.jpg')
+            self.lost_texture_path = os.path.join(self.root_dir, 'Textures\player2_lost.png')
+            self.won_texture_path = os.path.join(self.root_dir, 'Textures\player2_won.png')
 
         self.image = pygame.image.load(self.default_texture_path).convert_alpha()
         self.rect = self.image.get_rect()
@@ -85,7 +85,12 @@ class Player(Sprite_Physics):
             self.isJumping = False
 
     def change_state(self, target_state):
-        pass
+        if target_state == "lost":
+            self.image = pygame.image.load(self.lost_texture_path).convert_alpha()
+        elif target_state == "default":
+            self.image = pygame.image.load(self.default_texture_path).convert_alpha()
+        elif target_state == "won":
+            self.image = pygame.image.load(self.won_texture_path).convert_alpha()
 
     def draw_player(self, screen):
         screen.blit(self.image, self.rect)

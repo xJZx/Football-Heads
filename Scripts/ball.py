@@ -10,18 +10,17 @@ class Ball(Sprite_Physics):
 
         Sprite_Physics.__init__(self)
 
-        self.velocity = 10
+        self.init_ball()
 
         self.mass = 0.1
 
         self.game_path = os.getcwd()
         self.root_dir = os.path.dirname(self.game_path)
 
-        self.angle = random.uniform(0, math.pi*2)
+        self.speed_threshold = 20
 
-        # self.ball_state
-
-        self.default_texture_path = os.path.join(self.root_dir, r'Textures\ball_faf.png')
+        self.default_texture_path = os.path.join(self.root_dir, r'Textures\ball_slow.png')
+        self.angry_texture_path = os.path.join(self.root_dir, r'Textures\ball_faf.png')
         self.image = pygame.image.load(self.default_texture_path).convert_alpha()
         self.rect = self.image.get_rect()
 
@@ -33,6 +32,12 @@ class Ball(Sprite_Physics):
         self.rect.x += math.sin(self.angle) * self.velocity
         self.rect.y -= math.cos(self.angle) * self.velocity
 
+    def make_angry(self):
+        self.image = pygame.image.load(self.angry_texture_path).convert_alpha()
+
+    def make_happy(self):
+        self.image = pygame.image.load(self.default_texture_path).convert_alpha()
+
     @staticmethod
     def add_vectors(vector1, vector2):
         x = math.sin(vector1[0]) * vector1[1] + math.sin(vector2[0]) * vector1[1]
@@ -43,6 +48,10 @@ class Ball(Sprite_Physics):
         return_vector = (angle, length)
 
         return return_vector
+
+    def init_ball(self):
+        self.velocity = 10
+        self.angle = random.uniform(0, math.pi * 2)
 
     def bounce(self, screen, lower_bounds):
         if self.rect.x > screen.get_width() - self.rect.width:

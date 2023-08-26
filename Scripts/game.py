@@ -1,6 +1,7 @@
 import math
 import pygame
 import os
+import time
 
 from Scripts.foot import Foot
 from Scripts.goal import Goal
@@ -41,28 +42,31 @@ class Game:
         self.right_foot_offset_Y = 130
 
         self.playerOne = Player("left")
-        self.playerOne.rect.x = 100  # go to x
-        self.playerOne.rect.y = self.lower_bounds - self.playerOne.rect.height  # go to y
+        self.player_one_startPos = (100, self.lower_bounds - self.playerOne.rect.height)
+        self.playerOne.rect.x = self.player_one_startPos[0]
+        self.playerOne.rect.y = self.player_one_startPos[1]
 
         self.footOne = Foot("left")
         self.footOne.rect.x = self.playerOne.rect.x + self.left_foot_offset_X
         self.footOne.rect.y = self.playerOne.rect.y + self.left_foot_offset_Y
 
         self.playerTwo = Player("right")
-        self.playerTwo.rect.x = 1600  # go to x
-        self.playerTwo.rect.y = self.lower_bounds - self.playerTwo.rect.height  # go to y
+        self.player_two_startPos = (1600, self.lower_bounds - self.playerTwo.rect.height)
+        self.playerTwo.rect.x = self.player_two_startPos[0]
+        self.playerTwo.rect.y = self.player_two_startPos[1]
 
         self.footTwo = Foot("right")
         self.footTwo.rect.x = self.playerTwo.rect.x - self.left_foot_offset_X
         self.footTwo.rect.y = self.playerTwo.rect.y + self.left_foot_offset_Y
 
         self.ball = Ball()
-        self.ball.rect.x = 960
-        self.ball.rect.y = 400
+        self.ball_start_pos = (960, 400)
+        self.ball.rect.x = self.ball_start_pos[0]
+        self.ball.rect.y = self.ball_start_pos[1]
         self.collisionTolerance = 10
 
-        self.postOne = Post(0, 350)
-        self.postTwo = Post(self.screen.get_width() - self.postOne.rect.width, 350)
+        self.postOne = Post(0, 340)
+        self.postTwo = Post(self.screen.get_width() - self.postOne.rect.width, 340)
 
         self.goalOne = Goal(0, 360, 'left')
         self.goalTwo = Goal(self.screen.get_width() - self.goalOne.rect.width, 360, 'right')
@@ -78,6 +82,8 @@ class Game:
         self.goalTwo.draw_goal(self.screen)
 
         self.scored = False
+        self.control = True
+        self.goal_time = None
 
         self.score = [0, 0]
         self.my_font = pygame.font.SysFont("monospace", 82)
@@ -169,20 +175,6 @@ class Game:
                     self.ball.angle = math.pi + self.ball.angle
 
             # self.ball.velocity *= Sprite_Physics.elasticity
-    def invertImg(self, img):
-        """Inverts the colors of a pygame Screen"""
-
-        img.lock()
-
-        for x in range(img.get_width()):
-            for y in range(img.get_height()):
-                RGBA = img.get_at((x, y))
-                for i in range(3):
-                    # Invert RGB, but not Alpha
-                    RGBA[i] = 255 - RGBA[i]
-                img.set_at((x, y), RGBA)
-
-        img.unlock()
 
     def checkGoalLeft(self):
         if self.ball.rect.colliderect(self.goalOne) and abs(self.ball.rect.right - self.goalOne.rect.right) < self.ball.velocity:
@@ -215,6 +207,26 @@ class Game:
             return True
 
         return False
+
+    def goal_animation(self):
+        if not self.scored:
+            return
+
+        if time.perf_counter() - self.goal_time >= 5:
+            self.scored = False
+            self.control = True
+            self.playerOne.change_state("default")
+            self.playerTwo.change_state("default")
+            self.goal_time = None
+            self.ball.rect.x = self.ball_start_pos[0]
+            self.ball.rect.y = self.ball_start_pos[1]
+            self.ball.init_ball()
+
+            self.playerOne.rect.x = self.player_one_startPos[0]
+            self.playerOne.rect.y = self.player_one_startPos[1]
+
+            self.playerTwo.rect.x = self.player_two_startPos[0]
+            self.playerTwo.rect.y = self.player_two_startPos[1]
 
     def display_score(self):
         self.score_text = self.my_font.render(f"{self.score[0]} : {self.score[1]}", True, (0, 0, 255))
@@ -266,7 +278,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     # sys.exit()
-                elif event.type == pygame.KEYDOWN:
+                elif event.type == pygame.KEYDOWN and self.control:
                     if event.key == pygame.K_LEFT:
                         left_down = True
 
@@ -400,9 +412,6 @@ class Game:
             else:
                 self.playerOne.jump()
 
-            # for i, sprite1 in enumerate(self.all_sprites):
-            #     for sprite2 in self.all_sprites[i + 1:]:
-            #         Sprite_Physics.checkCollision(sprite1, sprite2)
             self.checkCollisionPlayer(self.ball, self.playerOne)
             self.checkCollisionPlayer(self.ball, self.playerTwo)
             self.checkCollisionPostTwo()
@@ -411,18 +420,12 @@ class Game:
             self.checkGoalRight()
             self.update_foot(self.playerOne, self.footOne)
             self.update_foot(self.playerTwo, self.footTwo)
+            self.check_ball_speed()
+            self.goal_animation()
 
             self.ball.bounce(self.screen, self.lower_bounds)
             self.ball.move()
             self.display_score()
-
-            # print(self.ball.velocity)
-            # print(self.playerTwo.velocity)
-            # print(self.playerOne.velocity)
-
-            # self.ball.bouncePlayer(self.playerOne, self.playerTwo)
-
-            # Update game logic and draw game objects
 
             # Update the display
             self.refresh()
