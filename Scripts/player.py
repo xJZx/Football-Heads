@@ -23,7 +23,7 @@ class Player(Sprite_Physics):
         self.isJumping = False
         self.jumpCount = 8
         self.currentJumpCount = self.jumpCount
-        self.lift_force = 0
+        self.jump_force = 0
 
         self.game_path = os.getcwd()
         self.root_dir = os.path.dirname(self.game_path)
@@ -69,7 +69,7 @@ class Player(Sprite_Physics):
     #         self.isJumping = False
 
     def jump(self):
-        self.lift_force = self.currentJumpCount
+        self.jump_force = self.currentJumpCount
 
         if self.currentJumpCount >= -self.jumpCount:
             neg = 1
@@ -78,10 +78,10 @@ class Player(Sprite_Physics):
 
             self.rect.y -= (abs(self.currentJumpCount) ** 2) * neg
             self.currentJumpCount -= 1
-            self.lift_force = self.currentJumpCount
+            self.jump_force = self.currentJumpCount
         else:
             self.currentJumpCount = self.jumpCount
-            self.lift_force = 0
+            self.jump_force = 0
             self.isJumping = False
 
     def change_state(self, target_state):

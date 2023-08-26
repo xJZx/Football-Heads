@@ -63,9 +63,6 @@ class Ball(Sprite_Physics):
             self.angle = math.pi - self.angle
             self.velocity *= Sprite_Physics.elasticity
 
-    def bouncePost(self, goalPost):
-        pass
-
     def rotate_image(self):
         rotated_image = pygame.transform.rotate(self.image, self.angle * -90)
         new_rect = rotated_image.get_rect()

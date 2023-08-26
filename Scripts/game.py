@@ -35,24 +35,26 @@ class Game:
 
         self.lower_bounds = 760
 
-        self.footOffsetX = 60
-        self.footOffsetY = 130
+        self.left_foot_offset_X = 60
+        self.left_foot_offset_Y = 130
+        self.right_foot_offset_X = 60
+        self.right_foot_offset_Y = 130
 
         self.playerOne = Player("left")
         self.playerOne.rect.x = 100  # go to x
         self.playerOne.rect.y = self.lower_bounds - self.playerOne.rect.height  # go to y
 
         self.footOne = Foot("left")
-        self.footOne.rect.x = self.playerOne.rect.x + self.footOffsetX
-        self.footOne.rect.y = self.playerOne.rect.y + self.footOffsetY
+        self.footOne.rect.x = self.playerOne.rect.x + self.left_foot_offset_X
+        self.footOne.rect.y = self.playerOne.rect.y + self.left_foot_offset_Y
 
         self.playerTwo = Player("right")
         self.playerTwo.rect.x = 1600  # go to x
         self.playerTwo.rect.y = self.lower_bounds - self.playerTwo.rect.height  # go to y
 
         self.footTwo = Foot("right")
-        self.footTwo.rect.x = self.playerTwo.rect.x - self.footOffsetX
-        self.footTwo.rect.y = self.playerTwo.rect.y + self.footOffsetY
+        self.footTwo.rect.x = self.playerTwo.rect.x - self.left_foot_offset_X
+        self.footTwo.rect.y = self.playerTwo.rect.y + self.left_foot_offset_Y
 
         self.ball = Ball()
         self.ball.rect.x = 960
@@ -104,8 +106,8 @@ class Game:
         # print('dy=', dy)
 
         distance = math.hypot(dx, dy)
-        # print('distance=', distance)
-        if distance < player.rect.width / 2 + ball.rect.width / 2:  # ball.rect.width +
+        # dodalem predkosc pilki do badanego dystansu
+        if distance < (player.rect.width / 2 + ball.rect.width / 2) + ball.velocity:  # ball.rect.width +
             tangent = math.atan2(dy, dx)
 
             angle = 0.5 * math.pi + tangent
@@ -113,7 +115,7 @@ class Game:
             total_mass = ball.mass + player.mass
 
             # ball gets the angle calculated from tangent and the current velocity of the player as zderzenie sprezyste
-            (ball.angle, ball.velocity) = (angle, 2 * abs(player.velocity + player.lift_force) * player.mass / total_mass + ball.velocity)
+            (ball.angle, ball.velocity) = (angle, 2 * abs(player.velocity + player.jump_force) * player.mass / total_mass + ball.velocity)
             # lower the speed of ball by elasticity,
             # otherwise would start getting constantly faster with every other bounce
             ball.velocity *= Sprite_Physics.elasticity
@@ -121,12 +123,17 @@ class Game:
             ball.rect.x += math.sin(angle)
             ball.rect.y -= math.cos(angle)
 
+    def checkCollisionFoot(self, ball, foot):
+        pass
+
     def checkCollisionPostOne(self):
         if self.ball.rect.colliderect(self.postOne):
 
             if abs(self.postOne.rect.top - self.ball.rect.bottom) < self.ball.velocity + self.collisionTolerance and (math.pi / 2) < self.ball.angle < (math.pi * 1.5): # hit from top
                 self.ball.angle = math.pi - self.ball.angle
                 self.ball.velocity *= Sprite_Physics.elasticity
+                if 0 <= self.ball.velocity < 0.5:
+                    self.ball.velocity += 1
 
             elif abs(self.postOne.rect.bottom - self.ball.rect.top) < self.ball.velocity + self.collisionTolerance and 0 < abs(self.ball.angle) < (math.pi / 2): # hit from bottom
                 self.ball.angle = math.pi - self.ball.angle
@@ -148,6 +155,8 @@ class Game:
             if abs(self.postTwo.rect.top - self.ball.rect.bottom) < self.ball.velocity + self.collisionTolerance and (math.pi / 2) < self.ball.angle < (math.pi * 1.5): # hit from top
                 self.ball.angle = math.pi - self.ball.angle
                 self.ball.velocity *= Sprite_Physics.elasticity
+                if 0 <= self.ball.velocity < 0.5:
+                    self.ball.velocity += 1
 
             elif abs(self.postTwo.rect.bottom - self.ball.rect.top) < self.ball.velocity + self.collisionTolerance and 0 < abs(self.ball.angle) < (math.pi / 2): # hit from bottom
                 self.ball.angle = math.pi - self.ball.angle
@@ -180,26 +189,20 @@ class Game:
             if not self.scored:
                 self.scored = True
                 self.score[1] += 1
-                self.invertImg(self.background)
-                self.invertImg(self.playerOne.image)
-                self.invertImg(self.playerTwo.image)
-                self.invertImg(self.goalOne.image)
-                self.invertImg(self.goalTwo.image)
-                self.invertImg(self.postOne.image)
-                self.invertImg(self.postTwo.image)
+                self.control = False
+                self.playerOne.change_state("lost")
+                self.playerTwo.change_state("won")
+                self.goal_time = time.perf_counter()
 
     def checkGoalRight(self):
         if self.ball.rect.colliderect(self.goalTwo) and abs(self.ball.rect.left - self.goalTwo.rect.left) < self.ball.velocity:
             if not self.scored:
                 self.scored = True
                 self.score[0] += 1
-                self.invertImg(self.background)
-                self.invertImg(self.playerOne.image)
-                self.invertImg(self.playerTwo.image)
-                self.invertImg(self.goalOne.image)
-                self.invertImg(self.goalTwo.image)
-                self.invertImg(self.postOne.image)
-                self.invertImg(self.postTwo.image)
+                self.control = False
+                self.playerOne.change_state("won")
+                self.playerTwo.change_state("lost")
+                self.goal_time = time.perf_counter()
 
     def checkLeftBounds(self, sprite):
         if sprite.rect.x > sprite.velocity:
@@ -219,11 +222,33 @@ class Game:
 
     def update_foot(self, player, foot):
         if player.player_side == "left":
-            foot.rect.x = player.rect.x + self.footOffsetX
-        else:
-            foot.rect.x = player.rect.x - self.footOffsetX
+            foot.rect.x = player.rect.x + self.left_foot_offset_X
+            foot.rect.y = player.rect.y + self.left_foot_offset_Y
 
-        foot.rect.y = player.rect.y + self.footOffsetY
+        else:
+            foot.rect.x = player.rect.x - self.right_foot_offset_X
+            foot.rect.y = player.rect.y + self.right_foot_offset_Y
+
+
+        # if self.kick_left is True:
+        #     self.footOne.rect.x += 50
+        #     self.footOne.rect.y += 50
+        # else:
+        #     self.footOne.rect.x -= 50
+        #     self.footOne.rect.y -= 50
+        #
+        # if self.kick_right is True:
+        #     self.footTwo.rect.x -= 50
+        #     self.footTwo.rect.y += 50
+        # else:
+        #     self.footTwo.rect.x += 50
+        #     self.footTwo.rect.y -= 50
+
+    def check_ball_speed(self):
+        if self.ball.velocity > self.ball.speed_threshold:
+            self.ball.make_angry()
+        else:
+            self.ball.make_happy()
 
     def run(self):
         # Add game loop if needed
@@ -279,63 +304,82 @@ class Game:
                     elif event.key == pygame.K_SPACE:
                         kick_left = False
 
-            if left_down and not right_down:
-                if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
-                        self.playerOne.rect.midright):
-                    if self.playerTwo.velocity >= -self.playerTwo.MAX_VELOCITY:
-                        self.playerTwo.velocity -= self.playerTwo.acceleration
-                    self.playerTwo.move()
-            else:
-                if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
-                        self.playerOne.rect.midright):
-                    if self.playerTwo.velocity < 0:
-                        self.playerTwo.velocity += self.playerTwo.acceleration
+            if True:
+                if left_down and not right_down:
+                    if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                            self.playerOne.rect.midright):
+                        if self.playerTwo.velocity >= -self.playerTwo.MAX_VELOCITY:
+                            self.playerTwo.velocity -= self.playerTwo.acceleration
                         self.playerTwo.move()
+                else:
+                    if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                            self.playerOne.rect.midright):
+                        if self.playerTwo.velocity < 0:
+                            self.playerTwo.velocity += self.playerTwo.acceleration
+                            self.playerTwo.move()
 
-            if right_down and not left_down:
-                if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
-                        self.playerOne.rect.midleft):
-                    if self.playerTwo.velocity <= self.playerTwo.MAX_VELOCITY:
-                        self.playerTwo.velocity += self.playerTwo.acceleration
-                    self.playerTwo.move()
-            else:
-                if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
-                        self.playerOne.rect.midleft):
-                    if self.playerTwo.velocity > 0:
-                        self.playerTwo.velocity -= self.playerTwo.acceleration
+                if right_down and not left_down:
+                    if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                            self.playerOne.rect.midleft):
+                        if self.playerTwo.velocity <= self.playerTwo.MAX_VELOCITY:
+                            self.playerTwo.velocity += self.playerTwo.acceleration
                         self.playerTwo.move()
+                else:
+                    if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                            self.playerOne.rect.midleft):
+                        if self.playerTwo.velocity > 0:
+                            self.playerTwo.velocity -= self.playerTwo.acceleration
+                            self.playerTwo.move()
 
-            if a_down and not d_down:
-                if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
-                        self.playerTwo.rect.midright):
-                    if self.playerOne.velocity >= -self.playerOne.MAX_VELOCITY:
-                        self.playerOne.velocity -= self.playerOne.acceleration
-                    self.playerOne.move()
-            else:
-                if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
-                        self.playerTwo.rect.midright):
-                    if self.playerOne.velocity < 0:
-                        self.playerOne.velocity += self.playerOne.acceleration
+                if a_down and not d_down:
+                    if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                            self.playerTwo.rect.midright):
+                        if self.playerOne.velocity >= -self.playerOne.MAX_VELOCITY:
+                            self.playerOne.velocity -= self.playerOne.acceleration
                         self.playerOne.move()
+                else:
+                    if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                            self.playerTwo.rect.midright):
+                        if self.playerOne.velocity < 0:
+                            self.playerOne.velocity += self.playerOne.acceleration
+                            self.playerOne.move()
 
-            if d_down and not a_down:
-                if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
-                        self.playerTwo.rect.midleft):
-                    if self.playerOne.velocity <= self.playerOne.MAX_VELOCITY:
-                        self.playerOne.velocity += self.playerOne.acceleration
-                    self.playerOne.move()
-            else:
-                if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
-                        self.playerTwo.rect.midleft):
-                    if self.playerOne.velocity > 0:
-                        self.playerOne.velocity -= self.playerOne.acceleration
+                if d_down and not a_down:
+                    if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                            self.playerTwo.rect.midleft):
+                        if self.playerOne.velocity <= self.playerOne.MAX_VELOCITY:
+                            self.playerOne.velocity += self.playerOne.acceleration
                         self.playerOne.move()
+                else:
+                    if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                            self.playerTwo.rect.midleft):
+                        if self.playerOne.velocity > 0:
+                            self.playerOne.velocity -= self.playerOne.acceleration
+                            self.playerOne.move()
 
-            # if kick_right:
-            #     self.kick(self.playerTwo)
-            #
-            # if kick_left:
-            #     self.kick(self.playerOne)
+                if kick_right and self.footTwo.foot_angle < self.footTwo.MAX_FOOT_ANGLE:
+                    self.right_foot_offset_Y -= 4
+                    self.right_foot_offset_X += 0.5
+                    self.footTwo.kick_right_foot()
+                else:
+                    if self.footTwo.foot_angle > 0:
+                        self.footTwo.foot_angle -= self.footTwo.FOOT_ANGLE_VELOCITY
+                        self.right_foot_offset_Y += 4
+                        self.right_foot_offset_X -= 0.5
+                        self.footTwo.rotate_foot()
+
+                if kick_left and self.footOne.foot_angle > -self.footOne.MAX_FOOT_ANGLE:
+                    self.left_foot_offset_Y -= 4
+                    self.left_foot_offset_X += 4
+                    self.footOne.kick_left_foot()
+                else:
+                    if self.footOne.foot_angle < 0:
+                        self.footOne.foot_angle += self.footOne.FOOT_ANGLE_VELOCITY
+                        self.left_foot_offset_Y += 4
+                        self.left_foot_offset_X -= 4
+                        self.footOne.rotate_foot()
+
+            #print(self.footOne.foot_angle)
 
             #print(self.playerOne.velocity)
             #print(self.playerTwo.velocity)
