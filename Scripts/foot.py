@@ -2,8 +2,6 @@ import math
 import pygame
 import os
 
-from pygame import Vector2
-
 from sprite_physics import Sprite_Physics
 
 
@@ -30,8 +28,6 @@ class Foot(Sprite_Physics):
         self.MAX_FOOT_ANGLE = 90
         self.FOOT_ANGLE_VELOCITY = 7
         self.foot_angle = 0
-        self.pos = Vector2()
-        self.offset = Vector2(50, 50)
 
         self.mass = 1
 

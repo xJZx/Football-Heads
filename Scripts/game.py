@@ -402,24 +402,24 @@ class Game:
                             self.playerOne.move()
 
                 if kick_right and self.footTwo.foot_angle < self.footTwo.MAX_FOOT_ANGLE:
-                    self.right_foot_offset_Y -= 4
+                    self.right_foot_offset_Y -= 10 # 4 domyślnie
                     self.right_foot_offset_X += 0.5
                     self.footTwo.kick_right_foot()
                 else:
                     if self.footTwo.foot_angle > 0:
                         self.footTwo.foot_angle -= self.footTwo.FOOT_ANGLE_VELOCITY
-                        self.right_foot_offset_Y += 4
+                        self.right_foot_offset_Y += 10 # 4 domyślnie
                         self.right_foot_offset_X -= 0.5
                         self.footTwo.rotate_foot()
 
                 if kick_left and self.footOne.foot_angle > -self.footOne.MAX_FOOT_ANGLE:
-                    self.left_foot_offset_Y -= 4
+                    self.left_foot_offset_Y -= 10 # 4 domyślnie
                     self.left_foot_offset_X += 7.5
                     self.footOne.kick_left_foot()
                 else:
                     if self.footOne.foot_angle < 0:
                         self.footOne.foot_angle += self.footOne.FOOT_ANGLE_VELOCITY
-                        self.left_foot_offset_Y += 4
+                        self.left_foot_offset_Y += 10 # 4 domyślnie
                         self.left_foot_offset_X -= 7.5
                         self.footOne.rotate_foot()
 
