@@ -294,7 +294,7 @@ class Game:
         else:
             self.ball.make_happy()
 
-    def run(self):
+    def run_offline(self):
         # Add game loop if needed
         left_down = False
         right_down = False
