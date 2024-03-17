@@ -1,7 +1,9 @@
+import json
 import math
 import pygame
 import os
 import time
+import socket
 
 from Scripts.foot import Foot
 from Scripts.goal import Goal
@@ -84,6 +86,12 @@ class Game:
         self.scored = False
         self.control = True
         self.goal_time = None
+
+        # controlls for client side (player two)
+        self.left_down = False
+        self.right_down = False
+        self.kick_right = False
+        self.player_two_jump_pressed = False
 
         self.score = [0, 0]
         self.my_font = pygame.font.SysFont("monospace", 82)
@@ -296,13 +304,16 @@ class Game:
 
     def run_offline(self):
         # Add game loop if needed
-        left_down = False
-        right_down = False
-        kick_right = False
 
+        # player one
         a_down = False
         d_down = False
         kick_left = False
+
+        # player two
+        left_down = False
+        right_down = False
+        kick_right = False
 
         while True:
             pygame.time.delay(20)
@@ -465,6 +476,211 @@ class Game:
             self.refresh()
             pygame.display.update()
 
+    def run_online_host(self):
+        # Add game loop if needed
+
+        a_down = False
+        d_down = False
+        kick_left = False
+
+        # startujemy tu server
+        # dodajemy klientów, którzy są threadami, na każdym threadzie są while, które słuchają event.keyów
+        # te event keye są w pętli głównej servera nasłuchiwane
+        # jak zrobić w tym wypadku wyświetlanie całej gry u klientów???
+
+        while True:
+            pygame.time.delay(20)
+
+            # even handling for server-client side (player one)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    # sys.exit()
+                elif event.type == pygame.KEYDOWN and self.control:
+
+                    if event.key == pygame.K_a:
+                        a_down = True
+
+                    elif event.key == pygame.K_d:
+                        d_down = True
+
+                    elif event.key == pygame.K_SPACE:
+                        kick_left = True
+
+                elif event.type == pygame.KEYUP:
+
+                    if event.key == pygame.K_a:
+                        a_down = False
+
+                    elif event.key == pygame.K_d:
+                        d_down = False
+
+                    elif event.key == pygame.K_SPACE:
+                        kick_left = False
+
+            if True:
+                if self.left_down and not self.right_down:
+                    if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                            self.playerOne.rect.midright):
+                        if self.playerTwo.velocity >= -self.playerTwo.MAX_VELOCITY:
+                            self.playerTwo.velocity -= self.playerTwo.acceleration
+                        self.playerTwo.move()
+                else:
+                    if self.checkLeftBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                            self.playerOne.rect.midright):
+                        if self.playerTwo.velocity < 0:
+                            self.playerTwo.velocity += self.playerTwo.acceleration
+                            self.playerTwo.move()
+
+                if self.right_down and not self.left_down:
+                    if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                            self.playerOne.rect.midleft):
+                        if self.playerTwo.velocity <= self.playerTwo.MAX_VELOCITY:
+                            self.playerTwo.velocity += self.playerTwo.acceleration
+                        self.playerTwo.move()
+                else:
+                    if self.checkRightBounds(self.playerTwo) and not self.playerTwo.rect.collidepoint(
+                            self.playerOne.rect.midleft):
+                        if self.playerTwo.velocity > 0:
+                            self.playerTwo.velocity -= self.playerTwo.acceleration
+                            self.playerTwo.move()
+
+                if a_down and not d_down:
+                    if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                            self.playerTwo.rect.midright):
+                        if self.playerOne.velocity >= -self.playerOne.MAX_VELOCITY:
+                            self.playerOne.velocity -= self.playerOne.acceleration
+                        self.playerOne.move()
+                else:
+                    if self.checkLeftBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                            self.playerTwo.rect.midright):
+                        if self.playerOne.velocity < 0:
+                            self.playerOne.velocity += self.playerOne.acceleration
+                            self.playerOne.move()
+
+                if d_down and not a_down:
+                    if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                            self.playerTwo.rect.midleft):
+                        if self.playerOne.velocity <= self.playerOne.MAX_VELOCITY:
+                            self.playerOne.velocity += self.playerOne.acceleration
+                        self.playerOne.move()
+                else:
+                    if self.checkRightBounds(self.playerOne) and not self.playerOne.rect.collidepoint(
+                            self.playerTwo.rect.midleft):
+                        if self.playerOne.velocity > 0:
+                            self.playerOne.velocity -= self.playerOne.acceleration
+                            self.playerOne.move()
+
+                if self.kick_right and self.footTwo.foot_angle < self.footTwo.MAX_FOOT_ANGLE:
+                    self.right_foot_offset_Y -= 10  # 4 domyślnie
+                    self.right_foot_offset_X += 0.5
+                    self.footTwo.kick_right_foot()
+                else:
+                    if self.footTwo.foot_angle > 0:
+                        self.footTwo.foot_angle -= self.footTwo.FOOT_ANGLE_VELOCITY
+                        self.right_foot_offset_Y += 10  # 4 domyślnie
+                        self.right_foot_offset_X -= 0.5
+                        self.footTwo.rotate_foot()
+
+                if kick_left and self.footOne.foot_angle > -self.footOne.MAX_FOOT_ANGLE:
+                    self.left_foot_offset_Y -= 10  # 4 domyślnie
+                    self.left_foot_offset_X += 7.5
+                    self.footOne.kick_left_foot()
+                else:
+                    if self.footOne.foot_angle < 0:
+                        self.footOne.foot_angle += self.footOne.FOOT_ANGLE_VELOCITY
+                        self.left_foot_offset_Y += 10  # 4 domyślnie
+                        self.left_foot_offset_X -= 7.5
+                        self.footOne.rotate_foot()
+
+            # print(self.footOne.foot_angle)
+
+            # print(self.playerOne.velocity)
+            # print(self.playerTwo.velocity)
+
+            keys = pygame.key.get_pressed()
+
+            if not self.playerTwo.isJumping:
+                if self.player_two_jump_pressed:
+                    self.playerTwo.isJumping = True
+
+            else:
+                self.playerTwo.jump()
+
+            if not self.playerOne.isJumping:
+                if keys[pygame.K_w]:
+                    self.playerOne.isJumping = True
+
+            else:
+                self.playerOne.jump()
+
+            self.checkCollisionPlayer(self.ball, self.playerOne)
+            self.checkCollisionPlayer(self.ball, self.playerTwo)
+            self.checkCollisionPostTwo()
+            self.checkCollisionPostOne()
+            self.checkGoalLeft()
+            self.checkGoalRight()
+            self.update_foot(self.playerOne, self.footOne)
+            self.update_foot(self.playerTwo, self.footTwo)
+            self.checkCollisionFoot(self.ball, self.footOne, self.playerOne)
+            self.checkCollisionFoot(self.ball, self.footTwo, self.playerTwo)
+            self.check_ball_speed()
+            self.goal_animation()
+
+            self.ball.bounce(self.screen, self.lower_bounds)
+            self.ball.move()
+            self.display_score()
+
+            # Update the display
+            self.refresh()
+            pygame.display.update()
+
+    def run_online_client(self):
+
+        self.left_down = False
+        self.right_down = False
+        self.kick_right = False
+        self.player_two_jump_pressed = False
+
+        while True:
+            pygame.time.delay(20)
+
+            # even handling for server-client side (player one)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    # sys.exit()
+                elif event.type == pygame.KEYDOWN and self.control:
+
+                    if event.key == pygame.K_LEFT:
+                        self.left_down = True
+
+                    elif event.key == pygame.K_RIGHT:
+                        self.right_down = True
+
+                    elif event.key == pygame.K_UP:
+                        self.player_two_jump_pressed = True
+
+                    elif event.key == pygame.K_p:
+                        self.kick_right = True
+
+                elif event.type == pygame.KEYUP:
+
+                    if event.key == pygame.K_LEFT:
+                        self.left_down = False
+
+                    elif event.key == pygame.K_RIGHT:
+                        self.right_down = False
+
+                    elif event.key == pygame.K_UP:
+                        self.player_two_jump_pressed = False
+
+                    elif event.key == pygame.K_p:
+                        self.kick_right = False
+
+            self.display_score()
+            self.refresh()
+
     def refresh(self):
         self.screen.blit(self.background, (0, 0))
         self.ball.draw_ball(self.screen)
@@ -478,3 +694,105 @@ class Game:
         self.goalTwo.draw_goal(self.screen)
         self.display_score()
         pygame.display.flip()
+
+    def run_client_thread(self):
+        server_addr = '127.0.0.1'
+        port = 5555
+
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        try:
+            client_socket.connect((server_addr, port))
+        except socket.error as e:
+            str(e)
+
+        while True:
+            # left pressed, right pressed, up_pressed, kick_pressed
+            data_to_send = {'left_pressed': self.left_down,
+                            'right_pressed': self.right_down,
+                            'up_pressed': self.player_two_jump_pressed,
+                            'kick_pressed': self.kick_right}
+
+            json_data = json.dumps(data_to_send).encode('utf-8')
+
+            client_socket.send(json_data)
+
+            data_from_server = client_socket.recv(2048)
+            json_objects = data_from_server.split(b'\n')
+            for json_object in json_objects:
+                try:
+                    server_data = json.loads(json_object.decode('utf-8'))
+
+                    # left pressed, right pressed, up_pressed, kick_pressed
+                    self.ball.rect.x = server_data['ball_x']
+                    self.ball.rect.y = server_data['ball_y']
+                    self.playerOne.rect.x = server_data['player_one_x']
+                    self.playerOne.rect.y = server_data['player_one_y']
+                    self.footOne.rect.x = server_data['foot_one_x']
+                    self.footOne.rect.y = server_data['foot_one_y']
+                    self.playerTwo.rect.x = server_data['player_two_x']
+                    self.playerTwo.rect.y = server_data['player_two_y']
+                    self.footTwo.rect.x = server_data['foot_two_x']
+                    self.footTwo.rect.y = server_data['foot_two_y']
+                    self.score = server_data['score']
+                except json.decoder.JSONDecodeError:
+                    pass
+
+        client_socket.close()
+
+    def run_server_thread(self):
+        server = '127.0.0.1'
+        port = 5555
+
+        print("run_server_thread STARTED!!!!")
+
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        try:
+            server_socket.bind((server, port))
+        except socket.error as e:
+            str(e)
+
+        server_socket.listen(1)
+        print("Waiting for a connection, Server Started")
+
+        # connection is an object representing what is connected
+        connection, address = server_socket.accept()
+        print("Connected to: ", address)
+
+        while True:
+            # ball_x, ball_y, p1_x, p1_y, f1_x, f1_y, p2_x, p2_y, f2_x, f2_y, score_left, score_right
+            data_to_send = {'ball_x': self.ball.rect.x,
+                            'ball_y': self.ball.rect.y,
+                            'player_one_x': self.playerOne.rect.x,
+                            'player_one_y': self.playerOne.rect.y,
+                            'foot_one_x': self.footOne.rect.x,
+                            'foot_one_y': self.footOne.rect.y,
+                            'player_two_x': self.playerTwo.rect.x,
+                            'player_two_y': self.playerTwo.rect.y,
+                            'foot_two_x': self.footTwo.rect.x,
+                            'foot_two_y': self.footTwo.rect.y,
+                            'score': self.score}
+
+            json_data = json.dumps(data_to_send).encode('utf-8')
+
+            connection.send(json_data)
+
+            data_from_client = connection.recv(2048)
+            json_objects = data_from_client.split(b'\n')
+            for json_object in json_objects:
+
+                try:
+                    client_data = json.loads(json_object.decode('utf-8'))
+
+                    # left pressed, right pressed, up_pressed, kick_pressed
+                    self.left_down = client_data['left_pressed']
+                    self.right_down = client_data['right_pressed']
+                    self.kick_right = client_data['kick_pressed']
+                    self.player_two_jump_pressed = client_data['up_pressed']
+
+                except json.decoder.JSONDecodeError:
+                    pass
+
+
+        server_socket.close()
