@@ -35,12 +35,13 @@ class Menu:
     def host_online(self):
         self.root.destroy()
         # trzeba func reference LOL
-        game_thread = Thread(target=self.game_instance.run_online_host)
+        # game_thread = Thread(target=self.game_instance.run_online_host)
         tcp_thread = Thread(target=self.game_instance.run_server_thread)
 
-        game_thread.start()
+        # game_thread.start()
         tcp_thread.start()
-        game_thread.join()
+        self.game_instance.run_online_host()
+        # game_thread.join()
         tcp_thread.join()
         # start thread for a TCP server
         # start thread for running the game
@@ -48,12 +49,13 @@ class Menu:
 
     def join_online(self):
         self.root.destroy()
-        game_thread = Thread(target=self.game_instance.run_online_client)
+        # game_thread = Thread(target=self.game_instance.run_online_client)
         tcp_thread = Thread(target=self.game_instance.run_client_thread)
 
-        game_thread.start()
+        # game_thread.start()
         tcp_thread.start()
-        game_thread.join()
+        self.game_instance.run_online_client()
+        # game_thread.join()
         tcp_thread.join()
         # start thread for a TCP client
         # start thread for running the game
