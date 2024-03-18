@@ -735,8 +735,10 @@ class Game:
                     self.footTwo.rect.x = server_data['foot_two_x']
                     self.footTwo.rect.y = server_data['foot_two_y']
                     self.score = server_data['score']
+
                 except json.decoder.JSONDecodeError:
                     pass
+
 
         client_socket.close()
 
@@ -793,6 +795,7 @@ class Game:
 
                 except json.decoder.JSONDecodeError:
                     pass
+
 
 
         server_socket.close()
